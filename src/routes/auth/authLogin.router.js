@@ -141,7 +141,7 @@ authLogin.use(
             console.log("Session user:", req.session.user);
             next();
         } catch (error) {
-            res.status(500).json({ message: "Internal server error !!!!!!" });
+            res.status(500).json({ message: "Internal server error !!!!!!!" });
         }
     }
 );
