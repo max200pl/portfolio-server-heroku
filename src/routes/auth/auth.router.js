@@ -9,6 +9,5 @@ authRouter.use("/login", authLogInRouter);
 authRouter.use("/logout", authLogOutRouter);
 
 module.exports = {
-    authRouter
+    authRouter,
 };
-
