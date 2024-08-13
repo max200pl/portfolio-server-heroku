@@ -6,7 +6,7 @@ authLogOut.use((req, res, next) => {
 });
 
 authLogOut.post("/", (req, res) => {
-    res.status(200).json({ message: "Logout success" });
+    return res.status(200).json({ message: "Logout success" });
 });
 
 module.exports = authLogOut;
