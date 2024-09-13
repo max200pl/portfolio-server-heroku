@@ -108,6 +108,5 @@ function sortWorksByDateDesc(works) {
 module.exports = {
     loadWorks,
     updateLocalWorks,
-    filterWorksByCategory,
     sortWorksByDateDesc,
 };
