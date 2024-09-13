@@ -1,7 +1,4 @@
-const {
-    Work,
-    parseDeep,
-} = require("../../helpers/helpers");
+const { Work, parseDeep } = require("../../helpers/helpers");
 const {
     getAllWorks,
     getAllCategories,
@@ -10,10 +7,9 @@ const {
     updateWork,
     deleteWork,
 } = require("../../models/works.model");
-const {
-    getCardImage,
-} = require("../../utils/images");
-const path = require('path');
+const { getCardImage } = require("../../utils/images");
+const path = require("path");
+const { sortWorksByDateDesc } = require("../../utils/works");
 
 async function httpGetAllWorks(req, res) {
     let works = undefined;
@@ -22,7 +18,11 @@ async function httpGetAllWorks(req, res) {
 
     try {
         works = await getAllWorks();
-        res.status(200).json(works);
+        if (category) {
+            works = works.filter((work) => work.category === category);
+        }
+        const sortedWorksByDateDesc = await sortWorksByDateDesc(works);
+        res.status(200).json(sortedWorksByDateDesc);
     } catch (error) {
         res.status(400).json({
             error: `Something went wrong ${error}`,
@@ -94,7 +94,7 @@ async function httpCreatedWork(req, res) {
 }
 
 async function httpUpdatedWork(req, res) {
-    const work = parseDeep(req.body)
+    const work = parseDeep(req.body);
     const image = req.file;
 
     try {
