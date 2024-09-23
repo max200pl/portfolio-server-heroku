@@ -1,4 +1,4 @@
-const CertificateSchema = require("../db/Certificates.mongo");
+const CertificateSchema = require("../db/certificates.mongo");
 const technologiesSchema = require("../db/technologies.mongo");
 
 async function createCertificate(Certificate) {

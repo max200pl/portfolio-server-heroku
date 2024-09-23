@@ -6,10 +6,9 @@ const {
     createCertificate,
     updateCertificate,
     deleteCertificate,
-} = require("../../models/Certificates.model");
+} = require("../../models/certificates.model");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
-const { sortCertificatesByDateDesc } = require("../../utils/Certificates");
 
 async function httpGetAllCertificates(req, res) {
     let certificates = undefined;
@@ -71,7 +70,7 @@ async function httpGetTechnologies(req, res) {
     return res.status(200).json(technologies[0]);
 }
 
-async function httpCreatedCertificate(req, res) {
+async function httpCreateCertificate(req, res) {
     const certificate = req.body;
     const image = req.file;
 
@@ -95,7 +94,7 @@ async function httpCreatedCertificate(req, res) {
     return res.status(201).json(certificate);
 }
 
-async function httpUpdatedCertificate(req, res) {
+async function httpUpdateCertificate(req, res) {
     const certificate = parseDeep(req.body);
     const image = req.file;
 
@@ -137,8 +136,8 @@ module.exports = {
     httpGetAllCertificates,
     httpGetImagesCertificate,
     httpGetCategoriesCertificates,
-    httpCreatedCertificate,
-    httpUpdatedCertificate,
+    httpCreateCertificate,
+    httpUpdateCertificate,
     httpGetTechnologies,
     httpDeleteCertificate,
 };

@@ -6,7 +6,6 @@ const api = express.Router();
 
 api.use("/works", worksRouter);
 api.use("/certificates", certificatesRouter);
-api.use("/certificates", certificatesRouter);
 api.use("/auth", authRouter);
 
 module.exports = api;
