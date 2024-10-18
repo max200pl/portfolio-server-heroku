@@ -86,11 +86,11 @@ async function httpCreatedWork(req, res) {
         const result = await createWork(Work.create({ ...work }));
 
         console.log("Create work success:", result);
+
+        return res.status(201).json({ id: result._id, ...work });
     } catch (err) {
         console.error(err.message);
     }
-
-    return res.status(201).json(work);
 }
 
 async function httpUpdatedWork(req, res) {
