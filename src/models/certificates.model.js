@@ -1,3 +1,4 @@
+const CategoryCertificate = require("../db/categoriesCertificates.mongo");
 const CertificateSchema = require("../db/certificates.mongo");
 const technologiesSchema = require("../db/technologies.mongo");
 
@@ -52,8 +53,8 @@ async function getGetFilterCertificates(category) {
     );
 }
 
-async function getAllCategories() {
-    return await CertificateSchema.find({}, { category: 1, _id: 0 });
+async function getAllCategoryCertificates() {
+    return await CategoryCertificate.find();
 }
 
 async function getTechnologies() {
@@ -71,7 +72,7 @@ module.exports = {
     deleteCertificate,
     createCertificate,
     updateCertificate,
-    getAllCategories,
+    getAllCategoryCertificates,
     getGetFilterCertificates,
     getTechnologies,
 };

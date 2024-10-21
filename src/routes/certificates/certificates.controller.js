@@ -1,11 +1,11 @@
 const { Certificate, parseDeep } = require("../../helpers/helpers");
 const {
     getAllCertificates,
-    getAllCategories,
     getTechnologies,
     createCertificate,
     updateCertificate,
     deleteCertificate,
+    getAllCategoryCertificates,
 } = require("../../models/certificates.model");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
@@ -49,16 +49,25 @@ async function httpGetImagesCertificate(req, res) {
         }
     });
 }
-async function httpGetCategoriesCertificates(req, res) {
-    const allCategories = await getAllCategories();
 
-    if (!allCategories)
+async function httpGetCategoriesCertificates(req, res) {
+    try {
+        const allCategories = await getAllCategoryCertificates();
+
+        if (!allCategories) {
+            return res.status(400).json({
+                error: `No categories found`,
+            });
+        }
+
+        res.status(200).json(allCategories);
+    } catch (error) {
         return res.status(400).json({
             error: `Something went wrong`,
         });
-
-    return res.status(200).json(allCategories);
+    }
 }
+
 async function httpGetTechnologies(req, res) {
     const technologies = await getTechnologies();
 
@@ -87,11 +96,11 @@ async function httpCreateCertificate(req, res) {
         );
 
         console.log("Create certificate success:", result);
+
+        return res.status(201).json({ id: result._id, ...certificate });
     } catch (err) {
         console.error(err.message);
     }
-
-    return res.status(201).json(certificate);
 }
 
 async function httpUpdateCertificate(req, res) {
