@@ -33,6 +33,8 @@ async function httpGetAllWorks(req, res) {
 async function httpGetImagesWork(req, res) {
     const { project, name } = req.query;
 
+    console.log("Project:", project);
+
     const options = {
         root: path.join(__dirname, "../../images/" + project),
         dotfiles: "deny",
@@ -111,7 +113,7 @@ async function httpUpdatedWork(req, res) {
         });
     }
 
-    return res.status(201).json(work);
+    return res.status(200).json(work);
 }
 
 async function httpDeleteWork(req, res) {
@@ -128,7 +130,7 @@ async function httpDeleteWork(req, res) {
         });
     }
 
-    return res.status(201).json(id);
+    return res.status(200).json(id);
 }
 
 module.exports = {
