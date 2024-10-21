@@ -1,9 +1,9 @@
-const workSchema = require("../db/works.mongo");
+const WorkSchema = require("../db/works.mongo");
 const technologiesSchema = require("../db/technologies.mongo");
 
 async function createWork(work) {
     try {
-        const result = await workSchema.create(work);
+        const result = await WorkSchema.create(work);
         console.log("Work created in database");
         return result;
     } catch (err) {
@@ -13,9 +13,9 @@ async function createWork(work) {
 
 async function updateWork(work) {
     try {
-        const result = await workSchema.updateOne(
+        const result = await WorkSchema.updateOne(
             { _id: work._id },
-            { $set: work },
+            { $set: work }
         );
         console.log("Work updated in database");
         return result;
@@ -26,9 +26,7 @@ async function updateWork(work) {
 
 async function deleteWork(id) {
     try {
-        const result = await workSchema.deleteOne(
-            { _id: id },
-        );
+        const result = await WorkSchema.deleteOne({ _id: id });
         console.log("Work deleted from database successfully.");
         return result;
     } catch (err) {
@@ -37,7 +35,7 @@ async function deleteWork(id) {
 }
 
 async function getAllWorks() {
-    return await workSchema.find(
+    return await WorkSchema.find(
         {},
         {
             __v: 0,
@@ -46,7 +44,7 @@ async function getAllWorks() {
 }
 
 async function getGetFilterWorks(category) {
-    return await workSchema.find(
+    return await WorkSchema.find(
         { category: category }, // which fields are included in the response
         {
             __v: 0,
@@ -55,7 +53,7 @@ async function getGetFilterWorks(category) {
 }
 
 async function getAllCategories() {
-    return await workSchema.find({}, { category: 1, _id: 0 });
+    return await WorkSchema.find({}, { category: 1, _id: 0 });
 }
 
 async function getTechnologies() {
