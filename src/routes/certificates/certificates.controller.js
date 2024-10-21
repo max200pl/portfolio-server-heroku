@@ -1,7 +1,6 @@
 const { Certificate, parseDeep } = require("../../helpers/helpers");
 const {
     getAllCertificates,
-    getTechnologies,
     createCertificate,
     updateCertificate,
     deleteCertificate,
@@ -68,17 +67,6 @@ async function httpGetCategoriesCertificates(req, res) {
     }
 }
 
-async function httpGetTechnologies(req, res) {
-    const technologies = await getTechnologies();
-
-    if (!technologies)
-        return res.status(400).json({
-            error: `Something went wrong`,
-        });
-
-    return res.status(200).json(technologies[0]);
-}
-
 async function httpCreateCertificate(req, res) {
     const certificate = req.body;
     const image = req.file;
@@ -121,7 +109,7 @@ async function httpUpdateCertificate(req, res) {
         });
     }
 
-    return res.status(201).json(certificate);
+    return res.status(200).json(certificate);
 }
 
 async function httpDeleteCertificate(req, res) {
@@ -138,7 +126,7 @@ async function httpDeleteCertificate(req, res) {
         });
     }
 
-    return res.status(201).json(id);
+    return res.status(200).json(id);
 }
 
 module.exports = {
@@ -147,6 +135,5 @@ module.exports = {
     httpGetCategoriesCertificates,
     httpCreateCertificate,
     httpUpdateCertificate,
-    httpGetTechnologies,
     httpDeleteCertificate,
 };

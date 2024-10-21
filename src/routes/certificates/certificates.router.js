@@ -4,8 +4,8 @@ const {
     httpGetCategoriesCertificates,
     httpGetImagesCertificates,
     httpCreateCertificate,
-    httpUpdatedCertificates,
-    httpDeleteCertificates,
+    httpUpdateCertificate,
+    httpDeleteCertificate,
 } = require("./certificates.controller");
 const certificatesRouter = express.Router();
 const upload = require("../../config/multerConfig");
@@ -19,18 +19,19 @@ certificatesRouter.get(
 );
 certificatesRouter.get("/categories", httpGetCategoriesCertificates);
 
-// certificatesRouter.delete("/delete", httpDeleteCertificates);
+certificatesRouter.delete("/delete", httpDeleteCertificate);
 certificatesRouter.post(
     "/create",
     upload.single("image"),
     httpCreateCertificate
 );
 
-// certificatesRouter.put(
-//     "/update",
-//     upload.single("image"),
-//     httpUpdatedCertificates
-// );
+certificatesRouter.put(
+    "/update",
+    upload.single("image"),
+    httpUpdateCertificate
+);
+
 // certificatesRouter.get("/image", httpGetImagesCertificates);
 
 module.exports = certificatesRouter;
