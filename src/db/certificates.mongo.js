@@ -12,7 +12,14 @@ const certificateSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         dateFinished: { type: Date },
-        category: { type: String, required: true },
+        category: {
+            type: {
+                _id: { type: String, required: true },
+                type_name: { type: String, required: true },
+                description: { type: String },
+            },
+            required: true,
+        },
         link: { type: String },
         cardImage: imageSchema,
     },

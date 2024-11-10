@@ -4,7 +4,6 @@ const categoryCertificateSchema = new mongoose.Schema(
     {
         type_name: { type: String, required: true },
         description: { type: String },
-        // Добавьте другие поля по необходимости
     },
     { timestamps: true }
 );

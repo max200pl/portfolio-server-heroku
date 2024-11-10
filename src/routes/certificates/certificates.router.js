@@ -2,7 +2,7 @@ const express = require("express");
 const {
     httpGetAllCertificates,
     httpGetCategoriesCertificates,
-    httpGetImagesCertificates,
+    httpGetImagesCertificate,
     httpCreateCertificate,
     httpUpdateCertificate,
     httpDeleteCertificate,
@@ -32,6 +32,6 @@ certificatesRouter.put(
     httpUpdateCertificate
 );
 
-// certificatesRouter.get("/image", httpGetImagesCertificates);
+certificatesRouter.get("/image", httpGetImagesCertificate);
 
 module.exports = certificatesRouter;

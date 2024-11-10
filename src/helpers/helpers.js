@@ -76,7 +76,11 @@ class Certificate {
     constructor({
         name = "",
         dateFinished = undefined,
-        category = "",
+        category = {
+            id: "",
+            type_name: "",
+            description: "",
+        },
         link = undefined,
         cardImage = undefined,
         images = [],
