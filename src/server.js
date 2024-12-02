@@ -1,6 +1,7 @@
 const http = require("http");
 const app = require("./app.js");
 const { mongoConnect } = require("./db/mongo");
+const { initializeFirebaseAdmin } = require("./utils/firebaseAdmin"); // Import initialization function
 
 const PORT = process.env.SERVER_PORT || 8000;
 const server = http.createServer(app);
@@ -8,10 +9,10 @@ const server = http.createServer(app);
 async function startServer() {
     await mongoConnect();
 
-    //* wait load data before starting server;
+    initializeFirebaseAdmin(); // Initialize Firebase Admin SDK
 
     server.listen(PORT, () => {
-        console.log(`Listening on ${PORT}...`);
+        console.log(`Server is listening on port ${PORT}...`);
     });
 }
 

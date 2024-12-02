@@ -1,9 +1,21 @@
-const { ref, uploadBytes, getDownloadURL } = require("firebase/storage");
-const { bucket } = require("./firebaseAdmin"); // Import bucket from firebaseAdmin
+const { initializeApp, getApps } = require("firebase/app");
+const {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL,
+} = require("firebase/storage");
+const { serviceAccount } = require("./firebaseAdmin"); // Import Firebase config
+
+// Initialize Firebase app if not already initialized
+if (!getApps().length) {
+    initializeApp(serviceAccount);
+}
 
 async function uploadImageToFirebase(file) {
     try {
-        const storageRef = ref(bucket, `images/${file.originalname}`);
+        const storage = getStorage();
+        const storageRef = ref(storage, `images/${file.originalname}`);
         const snapshot = await uploadBytes(storageRef, file.buffer);
         const downloadURL = await getDownloadURL(snapshot.ref);
         console.log("Image uploaded to Firebase:", downloadURL);

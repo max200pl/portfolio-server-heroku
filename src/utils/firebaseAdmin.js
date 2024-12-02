@@ -16,14 +16,24 @@ const serviceAccount = {
     universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN,
 };
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-});
+let bucket;
 
-const bucket = admin.storage().bucket();
+function initializeFirebaseAdmin() {
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+            databaseURL: process.env.FIREBASE_DATABASE_URL,
+        });
+        bucket = admin.storage().bucket();
+        console.log("Firebase Admin SDK initialized successfully.");
+    } catch (error) {
+        console.error("Error initializing Firebase Admin SDK:", error);
+    }
+}
 
 module.exports = {
+    initializeFirebaseAdmin,
     bucket,
+    serviceAccount, // Export service account
 };
