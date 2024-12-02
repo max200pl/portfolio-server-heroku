@@ -1,7 +1,6 @@
-const express = require('express');
-const http = require('http');
+const http = require("http");
 const app = require("./app.js");
-const { mongoConnect } = require('./db/mongo.js');
+const { mongoConnect } = require("./db/mongo");
 
 const PORT = process.env.SERVER_PORT || 8000;
 const server = http.createServer(app);
@@ -16,4 +15,4 @@ async function startServer() {
     });
 }
 
-startServer()
+startServer();

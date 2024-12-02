@@ -1,37 +1,44 @@
 const express = require("express");
+const multerConfig = require("../../utils/multerConfig");
 const {
+    httpCreateCertificate,
     httpGetAllCertificates,
     httpGetCategoriesCertificates,
-    httpGetImagesCertificate,
-    httpCreateCertificate,
-    httpUpdateCertificate,
     httpDeleteCertificate,
+    httpUpdateCertificate,
+    httpGetImagesCertificate,
 } = require("./certificates.controller");
-const certificatesRouter = express.Router();
-const upload = require("../../config/multerConfig");
 
-certificatesRouter.get("/", httpGetAllCertificates);
+const router = express.Router();
 
-certificatesRouter.get(
+router.post(
     "/create",
-    upload.single("image"),
-    httpCreateCertificate
-);
-certificatesRouter.get("/categories", httpGetCategoriesCertificates);
-
-certificatesRouter.delete("/delete", httpDeleteCertificate);
-certificatesRouter.post(
-    "/create",
-    upload.single("image"),
+    multerConfig,
+    (req, res, next) => {
+        if (!req.body || !req.file) {
+            return res.status(400).json({ error: "Invalid request data" });
+        }
+        next();
+    },
     httpCreateCertificate
 );
 
-certificatesRouter.put(
+router.get("/", httpGetAllCertificates);
+router.get("/categories", httpGetCategoriesCertificates);
+router.delete("/delete", httpDeleteCertificate);
+
+router.put(
     "/update",
-    upload.single("image"),
+    multerConfig,
+    (req, res, next) => {
+        if (!req.body || !req.file) {
+            return res.status(400).json({ error: "Invalid request data" });
+        }
+        next();
+    },
     httpUpdateCertificate
 );
 
-certificatesRouter.get("/image", httpGetImagesCertificate);
+router.get("/image", httpGetImagesCertificate);
 
-module.exports = certificatesRouter;
+module.exports = router;

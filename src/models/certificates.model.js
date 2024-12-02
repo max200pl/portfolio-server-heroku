@@ -2,26 +2,33 @@ const CategoryCertificate = require("../db/categoriesCertificates.mongo");
 const CertificateSchema = require("../db/certificates.mongo");
 const technologiesSchema = require("../db/technologies.mongo");
 
-async function createCertificate(Certificate) {
+async function createCertificate(certificateData) {
+    console.log("createCertificate called with data:", certificateData); // Add this log
     try {
-        const result = await CertificateSchema.create(Certificate);
+        const certificate = new CertificateSchema(certificateData);
+        const result = await certificate.save();
         console.log("Certificate created in database");
-        return result;
+        return { id: result._id, ...result._doc };
     } catch (err) {
-        console.log(`Could not save Certificate ${err}`);
+        console.error(`Could not save Certificate: ${err.message}`);
+        if (err.errors) {
+            console.error("Validation errors:", err.errors);
+        }
+        throw err;
     }
 }
 
-async function updateCertificate(Certificate) {
+async function updateCertificate(certificateData) {
     try {
-        const result = await CertificateSchema.updateOne(
-            { _id: Certificate._id },
-            { $set: Certificate }
+        const result = await Certificate.updateOne(
+            { _id: certificateData._id },
+            { $set: certificateData }
         );
         console.log("Certificate updated in database");
-        return result;
+        return { id: certificateData._id, ...certificateData };
     } catch (err) {
-        console.log(`Could not updated Certificate ${err}`);
+        console.log(`Could not update Certificate ${err}`);
+        throw err;
     }
 }
 

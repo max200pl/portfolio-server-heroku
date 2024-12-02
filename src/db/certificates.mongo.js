@@ -4,6 +4,7 @@ const imageSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         blurHash: { type: String, required: true },
+        url: { type: String, required: true },
     },
     { _id: false }
 );
@@ -12,18 +13,13 @@ const certificateSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         dateFinished: { type: Date },
-        category: {
-            type: {
-                _id: { type: String, required: true },
-                type_name: { type: String, required: true },
-                description: { type: String },
-            },
-            required: true,
-        },
-        link: { type: String },
+        category: { type: String, required: true },
         cardImage: imageSchema,
+        link: { type: String },
     },
     { timestamps: true }
 );
 
-module.exports = mongoose.model("Certificates", certificateSchema);
+const Certificate = mongoose.model("Certificate", certificateSchema);
+
+module.exports = Certificate;

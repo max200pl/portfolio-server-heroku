@@ -1,112 +1,115 @@
-const fs = require("fs");
-const {
-    getLocalImages,
-    getImageName,
-    getFolderName,
-} = require("../utils/images");
-const path = require("path");
-const WORKS_JSON_DIR_PATH = path.join(__dirname, "..", "data", "works.json");
+//! Load works from local JSON file
 
-async function getLocalWorks() {
-    try {
-        const localWorksJSON = await fs.readFile(WORKS_JSON_DIR_PATH);
-        const { works } = JSON.parse(localWorksJSON);
+// const fs = require("fs");
+// const {
+//     getLocalImages,
+//     getImageName,
+//     getFolderName,
+// } = require("../utils/images");
+// const path = require("path");
+// const WORKS_JSON_DIR_PATH = path.join(__dirname, "..", "data", "works.json");
 
-        console.log("local Works Successfully PARSE");
-        return works;
-    } catch (error) {
-        console.log("Error parse works:", error);
-    }
-}
 
-function getWorkImages(idWork, localImages) {
-    // nameFolder
-    const dataImages = {
-        cardImage: {
-            name: "", // intro.png
-            blurHash: "",
-        },
-        images: [],
-    };
+// async function getLocalWorks() {
+//     try {
+//         const localWorksJSON = await fs.readFile(WORKS_JSON_DIR_PATH);
+//         const { works } = JSON.parse(localWorksJSON);
 
-    localImages.map((image) => {
-        const imageName = getImageName(image.name);
-        const folderName = getFolderName(image.name);
+//         console.log("local Works Successfully PARSE");
+//         return works;
+//     } catch (error) {
+//         console.log("Error parse works:", error);
+//     }
+// }
 
-        if (idWork === folderName) {
-            if (imageName.includes("intro")) {
-                dataImages.cardImage = image;
-            } else {
-                dataImages.images.push(image);
-            }
-        }
-    });
+// function getWorkImages(idWork, localImages) {
+//     // nameFolder
+//     const dataImages = {
+//         cardImage: {
+//             name: "", // intro.png
+//             blurHash: "",
+//         },
+//         images: [],
+//     };
 
-    return dataImages;
-}
+//     localImages.map((image) => {
+//         const imageName = getImageName(image.name);
+//         const folderName = getFolderName(image.name);
 
-async function bindImagesAndWork() {
-    const localWorks = await getLocalWorks();
-    const localImages = await getLocalImages();
+//         if (idWork === folderName) {
+//             if (imageName.includes("intro")) {
+//                 dataImages.cardImage = image;
+//             } else {
+//                 dataImages.images.push(image);
+//             }
+//         }
+//     });
 
-    const updatedWorks = localWorks.map((work) => {
-        const { cardImage, images } = getWorkImages(work.id, localImages);
+//     return dataImages;
+// }
 
-        return {
-            ...work,
-            cardImage: cardImage,
-            images: images,
-        };
-    });
+// async function bindImagesAndWork() {
+//     const localWorks = await getLocalWorks();
+//     const localImages = await getLocalImages();
 
-    return updatedWorks;
-}
+//     const updatedWorks = localWorks.map((work) => {
+//         const { cardImage, images } = getWorkImages(work.id, localImages);
 
-async function updateLocalWorks() {
-    const works = await bindImagesAndWork();
+//         return {
+//             ...work,
+//             cardImage: cardImage,
+//             images: images,
+//         };
+//     });
 
-    fs.writeFile(
-        WORKS_JSON_DIR_PATH,
-        JSON.stringify({ works: works }, null, 2),
-        (err) => {
-            if (err) {
-                console.error(
-                    `There was an error creating ${JSON.stringify(err)}`
-                );
-            } else {
-                console.log("File WORKS_JSON created successfully");
-            }
-        }
-    );
-}
+//     return updatedWorks;
+// }
 
-async function setLocalWorksInDB() {
-    try {
-        const works = await getLocalWorks();
-        works.map((work) => saveWork(work));
-    } catch (error) {
-        console.error(error.message);
-    }
-}
+// async function updateLocalWorks() {
+//     const works = await bindImagesAndWork();
 
-async function loadWorks() {
-    const isDbEmpty = (await getAllWorks()).length === 0;
+//     fs.writeFile(
+//         WORKS_JSON_DIR_PATH,
+//         JSON.stringify({ works: works }, null, 2),
+//         (err) => {
+//             if (err) {
+//                 console.error(
+//                     `There was an error creating ${JSON.stringify(err)}`
+//                 );
+//             } else {
+//                 console.log("File WORKS_JSON created successfully");
+//             }
+//         }
+//     );
+// }
 
-    if (!isDbEmpty) {
-        console.log("Works already loaded in DB");
-    } else {
-        await setLocalWorksInDB();
-    }
-}
+// async function setLocalWorksInDB() {
+//     try {
+//         const works = await getLocalWorks();
+//         works.map((work) => saveWork(work));
+//     } catch (error) {
+//         console.error(error.message);
+//     }
+// }
 
-function sortWorksByDateDesc(works) {
-    return works.sort(
-        (a, b) => new Date(b.dateFinished) - new Date(a.dateFinished)
-    );
-}
+// async function loadWorks() {
+//     const isDbEmpty = (await getAllWorks()).length === 0;
 
-module.exports = {
-    loadWorks,
-    updateLocalWorks,
-    sortWorksByDateDesc,
-};
+//     if (!isDbEmpty) {
+//         console.log("Works already loaded in DB");
+//     } else {
+//         await setLocalWorksInDB();
+//     }
+// }
+
+// function sortWorksByDateDesc(works) {
+//     return works.sort(
+//         (a, b) => new Date(b.dateFinished) - new Date(a.dateFinished)
+//     );
+// }
+
+// module.exports = {
+//     loadWorks,
+//     updateLocalWorks,
+//     sortWorksByDateDesc,
+// };

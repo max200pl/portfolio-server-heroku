@@ -6,6 +6,7 @@ const {
     deleteCertificate,
     getAllCategoryCertificates,
 } = require("../../models/certificates.model");
+const { uploadImageToFirebase } = require("../../utils/firebaseStorage");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
 
@@ -68,26 +69,50 @@ async function httpGetCategoriesCertificates(req, res) {
 }
 
 async function httpCreateCertificate(req, res) {
-    const certificate = req.body;
-    const image = req.file;
+    const { name, dateFinished, category, link } = req.body;
+    const file = req.file;
 
-    if (!certificate || !image)
-        return res.status(400).json({
-            error: `Something went wrong`,
-        });
+    console.log("Current certificate for create:", req.body);
+    console.log("Current image for create:", req.file);
+
+    if (!name || !category || !file) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
 
     try {
-        certificate.cardImage = await getCardImage(certificate.name, image);
+        const cardImage = await getCardImage(name, file);
 
-        const result = await createCertificate(
-            Certificate.create({ ...certificate })
-        );
+        console.log("Current card image for create:", cardImage);
 
-        console.log("Create certificate success:", result);
+        const imageUrl = await uploadImageToFirebase(file);
 
-        return res.status(201).json({ id: result._id, ...certificate });
+        console.log("Current image URL for create:", imageUrl);
+
+        const certificateData = {
+            name,
+            dateFinished,
+            category,
+            link,
+            cardImage: {
+                name: cardImage.name,
+                blurHash: cardImage.blurHash,
+                url: imageUrl,
+            },
+        };
+
+        console.log("Current certificate data for create:", certificateData);
+
+        const result = await createCertificate(certificateData);
+
+        console.log("The certificate was successfully created:", result);
+
+        res.status(201).json({ id: result.id, ...result });
     } catch (err) {
-        console.error(err.message);
+        console.error("Error creating certificate:", err.message);
+        res.status(500).json({
+            message: `Invalid input: ${err.message}`,
+            details: err.errors,
+        });
     }
 }
 
