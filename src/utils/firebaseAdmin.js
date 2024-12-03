@@ -17,18 +17,24 @@ const serviceAccount = {
 };
 
 let bucket;
+let firebaseApp; // Add firebaseApp variable
 
 function initializeFirebaseAdmin() {
-    try {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-            databaseURL: process.env.FIREBASE_DATABASE_URL,
-        });
-        bucket = admin.storage().bucket();
-        console.log("Firebase Admin SDK initialized successfully.");
-    } catch (error) {
-        console.error("Error initializing Firebase Admin SDK:", error);
+    if (!admin.apps.length) {
+        // Check if Firebase app is already initialized
+        try {
+            firebaseApp = admin.initializeApp({
+                // Assign to firebaseApp
+                credential: admin.credential.cert(serviceAccount),
+                storageBucket: `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
+            });
+            bucket = admin.storage().bucket();
+            console.log("Firebase Admin SDK initialized successfully.");
+        } catch (error) {
+            console.error("Error initializing Firebase Admin SDK:", error);
+        }
+    } else {
+        firebaseApp = admin.app(); // Use existing app if already initialized
     }
 }
 
@@ -36,4 +42,11 @@ module.exports = {
     initializeFirebaseAdmin,
     bucket,
     serviceAccount, // Export service account
+    get firebaseApp() {
+        // Export firebaseApp with getter to ensure it's initialized
+        if (!firebaseApp) {
+            throw new Error("Firebase app is not initialized");
+        }
+        return firebaseApp;
+    },
 };

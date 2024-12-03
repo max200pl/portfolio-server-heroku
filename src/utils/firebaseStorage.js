@@ -1,20 +1,15 @@
-const { initializeApp, getApps } = require("firebase/app");
 const {
     getStorage,
     ref,
     uploadBytes,
     getDownloadURL,
 } = require("firebase/storage");
-const { serviceAccount } = require("./firebaseAdmin"); // Import Firebase config
-
-// Initialize Firebase app if not already initialized
-if (!getApps().length) {
-    initializeApp(serviceAccount);
-}
-
 async function uploadImageToFirebase(file) {
     try {
-        const storage = getStorage();
+        const storage = getStorage(
+            firebaseAp,
+            "gs://portfolio-react-5b7d3.firebasestorage.app"
+        ); // Correct initialization
         const storageRef = ref(storage, `images/${file.originalname}`);
         const snapshot = await uploadBytes(storageRef, file.buffer);
         const downloadURL = await getDownloadURL(snapshot.ref);
