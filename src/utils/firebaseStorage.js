@@ -4,19 +4,19 @@ async function uploadImageToFirebase(file) {
     try {
         console.log(`Uploading image to Firebase: ${file.originalname}`);
 
-        // Инициализация хранилища
+        // Initialize storage
         const bucket = admin.storage().bucket();
         const destination = `images/${file.originalname}`;
         const contentType = file.mimetype;
         const fileBuffer = file.buffer;
 
-        // Получаем ссылку на файл в хранилище
+        // Get a reference to the file in storage
         const firebaseFile = bucket.file(destination);
 
-        // Создаём поток для записи данных
+        // Create a stream to write data
         const stream = firebaseFile.createWriteStream({
             metadata: {
-                contentType: contentType, // Устанавливаем тип содержимого
+                contentType: contentType, // Set content type
             },
         });
 
@@ -33,7 +33,7 @@ async function uploadImageToFirebase(file) {
                 resolve(destination);
             });
 
-            // Пишем данные в поток
+            // Write data to the stream
             stream.end(fileBuffer);
         });
     } catch (err) {
