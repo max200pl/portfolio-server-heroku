@@ -3,7 +3,6 @@ const CertificateSchema = require("../db/certificates.mongo");
 const technologiesSchema = require("../db/technologies.mongo");
 
 async function createCertificate(certificateData) {
-    console.log("createCertificate called with data:", certificateData); // Add this log
     try {
         const certificate = new CertificateSchema(certificateData);
         const result = await certificate.save();
@@ -39,6 +38,14 @@ async function deleteCertificate(id) {
         return result;
     } catch (err) {
         console.log(`Could not deleted Certificate ${err}`);
+    }
+}
+
+async function getCertificateById(id) {
+    try {
+        return await CertificateSchema.findById(id);
+    } catch (err) {
+        console.log(`Could not find Certificate ${err}`);
     }
 }
 
@@ -82,4 +89,5 @@ module.exports = {
     getAllCategoryCertificates,
     getGetFilterCertificates,
     getTechnologies,
+    getCertificateById,
 };
