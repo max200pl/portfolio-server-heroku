@@ -6,6 +6,17 @@ const { initializeFirebaseAdmin } = require("./utils/firebaseAdmin"); // Import 
 const PORT = process.env.SERVER_PORT || 8000;
 const server = http.createServer(app);
 
+server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+        console.error(
+            `Port ${PORT} is already in use. Please use a different port.`
+        );
+        process.exit(1);
+    } else {
+        console.error(`Server error: ${err.message}`);
+    }
+});
+
 async function startServer() {
     await mongoConnect();
 
