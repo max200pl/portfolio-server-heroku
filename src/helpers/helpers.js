@@ -1,4 +1,13 @@
+const { v4: uuidv4 } = require("uuid");
+const path = require("path");
+
 function toCamelCase(str) {
+    if (typeof str !== "string") {
+        console.error(
+            `Error converting to camelCase: input is not a string ${str}`
+        );
+        return str;
+    }
     try {
         return str
             .trim()
@@ -39,6 +48,15 @@ function parseDeep(data) {
     }
 
     return parsedObject;
+}
+
+function generateImageDestination(name, file) {
+    const uniqueId = uuidv4({
+        rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
+    });
+    const camelCaseName = toCamelCase(name);
+    const fileType = path.extname(file.originalname);
+    return `images/certificates/${camelCaseName}_${uniqueId}${fileType}`;
 }
 
 class Work {
@@ -104,6 +122,7 @@ class Certificate {
 module.exports = {
     parseDeep,
     toCamelCase,
+    generateImageDestination,
     Work,
     Certificate,
 };

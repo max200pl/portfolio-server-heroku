@@ -50,7 +50,7 @@ const encodeImageToBlurHash = (buffer) => {
 async function getCardImage(name, image) {
     try {
         const cardImage = {
-            name: image.originalname,
+            name,
             blurHash: await encodeImageToBlurHash(image.buffer),
         };
         console.log("Current card image for create:", cardImage);

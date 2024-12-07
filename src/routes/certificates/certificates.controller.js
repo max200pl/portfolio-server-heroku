@@ -14,15 +14,7 @@ const {
 } = require("../../utils/firebaseStorage");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
-const { v4: uuidv4 } = require("uuid");
-
-function toCamelCase(str) {
-    return str
-        .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
-            return index === 0 ? match.toLowerCase() : match.toUpperCase();
-        })
-        .replace(/\s+/g, "");
-}
+const { generateImageDestination } = require("../../helpers/helpers");
 
 async function httpGetAllCertificates(req, res) {
     let certificates = undefined;
@@ -94,12 +86,7 @@ async function httpCreateCertificate(req, res) {
     }
 
     try {
-        const uniqueId = uuidv4({
-            rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
-        });
-        const camelCaseName = toCamelCase(name);
-        const fileType = path.extname(file.originalname);
-        const destination = `images/certificates/${camelCaseName}_${uniqueId}${fileType}`;
+        const destination = generateImageDestination(name, file);
         console.log("Current image destination for create:", destination);
 
         const cardImage = await getCardImage(name, file);
@@ -138,17 +125,49 @@ async function httpCreateCertificate(req, res) {
 }
 
 async function httpUpdateCertificate(req, res) {
-    const certificate = parseDeep(req.body);
+    let newCertificate = req.body;
     const image = req.file;
 
     try {
+        //1 - get certificate by id
+        const oldCertificate = await getCertificateById(newCertificate.id);
+
+        const oldDestination = oldCertificate.cardImage.destination;
+
         if (image) {
-            certificate.cardImage = await getCardImage(certificate.name, image);
+            const destination = generateImageDestination(
+                newCertificate.name,
+                image
+            );
+            const newImageUrl = await getDownloadURLFromFirebase(destination);
+            const newCardImage = await getCardImage(newCertificate.name, image);
+
+            //2 - delete old image from firebase
+            await deleteImageFromFirebase(oldDestination);
+            //3 - upload new image to firebase
+            await uploadImageToFirebase(image, destination);
+
+            //4 - update certificate with new image details
+            newCertificate = {
+                ...newCertificate,
+                cardImage: {
+                    name: newCardImage.name,
+                    blurHash: newCardImage.blurHash,
+                    destination: destination,
+                    url: newImageUrl,
+                },
+            };
+
+            console.log("Current certificate for update:", newCertificate);
         }
 
-        console.log("Current certificate for update:", certificate);
-        const result = await updateCertificate(certificate);
-        console.log("The certificate was successfully updated:", result);
+        //6 - update certificate
+        console.log("Current certificate for update:", newCertificate);
+        const result = await updateCertificate(oldCertificate);
+        console.log(
+            "The certificate was successfully updated:",
+            oldCertificate
+        );
     } catch (err) {
         console.error(err.message);
         return res.status(400).json({
@@ -156,7 +175,7 @@ async function httpUpdateCertificate(req, res) {
         });
     }
 
-    return res.status(200).json(certificate);
+    return res.status(200).json(newCertificate);
 }
 
 async function httpDeleteCertificate(req, res) {
@@ -168,11 +187,10 @@ async function httpDeleteCertificate(req, res) {
 
         await deleteImageFromFirebase(cardImage.destination);
 
-        await deleteCertificate(id);
+        const result = await deleteCertificate(id); // Define the result variable
 
         console.info(`
-            The certificate was successfully deleted: ${result}
-            The image was successfully deleted: ${deleteImage}
+            The certificate was successfully deleted: ${id}
         `);
     } catch (err) {
         console.error(err.message);
