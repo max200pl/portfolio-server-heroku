@@ -1,4 +1,4 @@
-const { Certificate, parseDeep } = require("../../helpers/helpers");
+const { parseDeep } = require("../../helpers/helpers");
 const {
     getAllCertificates,
     createCertificate,
@@ -14,6 +14,15 @@ const {
 } = require("../../utils/firebaseStorage");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+
+function toCamelCase(str) {
+    return str
+        .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+            return index === 0 ? match.toLowerCase() : match.toUpperCase();
+        })
+        .replace(/\s+/g, "");
+}
 
 async function httpGetAllCertificates(req, res) {
     let certificates = undefined;
@@ -85,7 +94,12 @@ async function httpCreateCertificate(req, res) {
     }
 
     try {
-        const destination = `images/certificates/${file.originalname}`;
+        const uniqueId = uuidv4({
+            rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
+        });
+        const camelCaseName = toCamelCase(name);
+        const fileType = path.extname(file.originalname);
+        const destination = `images/certificates/${camelCaseName}_${uniqueId}${fileType}`;
         console.log("Current image destination for create:", destination);
 
         const cardImage = await getCardImage(name, file);
