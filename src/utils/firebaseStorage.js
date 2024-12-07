@@ -1,12 +1,11 @@
 const admin = require("firebase-admin");
 
-async function uploadImageToFirebase(file) {
+async function uploadImageToFirebase(file, destination) {
     try {
         console.log(`Uploading image to Firebase: ${file.originalname}`);
 
         // Initialize storage
         const bucket = admin.storage().bucket();
-        const destination = `images/${file.originalname}`;
         const contentType = file.mimetype;
         const fileBuffer = file.buffer;
 

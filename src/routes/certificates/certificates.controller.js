@@ -71,6 +71,7 @@ async function httpGetCategoriesCertificates(req, res) {
 async function httpCreateCertificate(req, res) {
     const { name, dateFinished, category, link } = req.body;
     const file = req.file;
+    const destination = `images/certificates/${file.originalname}`;
 
     console.log("Current certificate for create:", req.body);
     console.log("Current image for create:", req.file);
@@ -84,7 +85,7 @@ async function httpCreateCertificate(req, res) {
 
         console.log("Current card image for create:", cardImage);
 
-        const imageUrl = await uploadImageToFirebase(file);
+        const imageUrl = await uploadImageToFirebase(file, destination);
 
         console.log("Current image URL for create:", imageUrl);
 
