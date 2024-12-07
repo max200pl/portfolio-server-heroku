@@ -1,4 +1,5 @@
 const admin = require("firebase-admin");
+const { getStorage, getDownloadURL } = require("firebase-admin/storage");
 
 async function uploadImageToFirebase(file, destination) {
     try {
@@ -41,6 +42,51 @@ async function uploadImageToFirebase(file, destination) {
     }
 }
 
+async function deleteImageFromFirebase(destination) {
+    try {
+        const bucket = admin.storage().bucket();
+        const firebaseFile = bucket.file(destination);
+
+        return new Promise((resolve, reject) => {
+            firebaseFile.delete((err) => {
+                if (err) {
+                    console.error(
+                        `Error deleting image from Firebase: ${err.message}`
+                    );
+                    reject(err);
+                } else {
+                    console.log(`Image deleted from Firebase: ${destination}`);
+                    resolve();
+                }
+            });
+        });
+    } catch (err) {
+        console.error(`Error deleting image from Firebase: ${err.message}`);
+        throw err;
+    }
+}
+
+/**
+ * @param {string} destination
+ * @returns {string} URL
+ */
+async function getDownloadURLFromFirebase(destination) {
+    try {
+        const fileRef = getStorage().bucket().file(destination);
+        const url = await getDownloadURL(fileRef);
+
+        console.log(`Download URL from Firebase: ${url}`);
+        return url;
+    } catch (err) {
+        console.error(
+            `Error getting download URL from Firebase: ${err.message}`
+        );
+        throw err;
+    }
+}
+
 module.exports = {
     uploadImageToFirebase,
+    deleteImageFromFirebase,
+    getDownloadURLFromFirebase,
 };
