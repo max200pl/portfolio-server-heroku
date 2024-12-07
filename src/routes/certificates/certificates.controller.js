@@ -5,8 +5,13 @@ const {
     updateCertificate,
     deleteCertificate,
     getAllCategoryCertificates,
+    getCertificateById,
 } = require("../../models/certificates.model");
-const { uploadImageToFirebase } = require("../../utils/firebaseStorage");
+const {
+    uploadImageToFirebase,
+    deleteImageFromFirebase,
+    getDownloadURLFromFirebase,
+} = require("../../utils/firebaseStorage");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
 
@@ -71,7 +76,6 @@ async function httpGetCategoriesCertificates(req, res) {
 async function httpCreateCertificate(req, res) {
     const { name, dateFinished, category, link } = req.body;
     const file = req.file;
-    const destination = `images/certificates/${file.originalname}`;
 
     console.log("Current certificate for create:", req.body);
     console.log("Current image for create:", req.file);
@@ -81,13 +85,14 @@ async function httpCreateCertificate(req, res) {
     }
 
     try {
+        const destination = `images/certificates/${file.originalname}`;
+        console.log("Current image destination for create:", destination);
+
         const cardImage = await getCardImage(name, file);
 
-        console.log("Current card image for create:", cardImage);
+        await uploadImageToFirebase(file, destination);
 
-        const imageUrl = await uploadImageToFirebase(file, destination);
-
-        console.log("Current image URL for create:", imageUrl);
+        const imageUrl = await getDownloadURLFromFirebase(destination);
 
         const certificateData = {
             name,
@@ -97,6 +102,7 @@ async function httpCreateCertificate(req, res) {
             cardImage: {
                 name: cardImage.name,
                 blurHash: cardImage.blurHash,
+                destination: destination,
                 url: imageUrl,
             },
         };
@@ -125,6 +131,7 @@ async function httpUpdateCertificate(req, res) {
         if (image) {
             certificate.cardImage = await getCardImage(certificate.name, image);
         }
+
         console.log("Current certificate for update:", certificate);
         const result = await updateCertificate(certificate);
         console.log("The certificate was successfully updated:", result);
@@ -140,11 +147,19 @@ async function httpUpdateCertificate(req, res) {
 
 async function httpDeleteCertificate(req, res) {
     const { id } = req.query;
+    console.info("Current certificate for delete:", id);
 
     try {
-        console.log("Current ID for delete:", id);
-        const result = await deleteCertificate(id);
-        console.log("The certificate was successfully updated:", result);
+        const { cardImage } = await getCertificateById(id);
+
+        await deleteImageFromFirebase(cardImage.destination);
+
+        await deleteCertificate(id);
+
+        console.info(`
+            The certificate was successfully deleted: ${result}
+            The image was successfully deleted: ${deleteImage}
+        `);
     } catch (err) {
         console.error(err.message);
         return res.status(400).json({
