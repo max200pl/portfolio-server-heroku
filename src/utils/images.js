@@ -53,7 +53,7 @@ async function getCardImage(name, image) {
             name: image.originalname,
             blurHash: await encodeImageToBlurHash(image.buffer),
         };
-
+        console.log("Current card image for create:", cardImage);
         return cardImage;
     } catch (err) {
         console.error(`Error processing image: ${err.message}`);
