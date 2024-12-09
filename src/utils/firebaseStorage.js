@@ -50,10 +50,15 @@ async function deleteImageFromFirebase(destination) {
         return new Promise((resolve, reject) => {
             firebaseFile.delete((err) => {
                 if (err) {
-                    console.error(
-                        `Error deleting image from Firebase: ${err.message}`
-                    );
-                    reject(err);
+                    if (err.code === 404) {
+                        console.log(`No such object: ${destination}`);
+                        resolve();
+                    } else {
+                        console.error(
+                            `Error deleting image from Firebase: ${err.message}`
+                        );
+                        reject(err);
+                    }
                 } else {
                     console.log(`Image deleted from Firebase: ${destination}`);
                     resolve();

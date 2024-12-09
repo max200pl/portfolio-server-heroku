@@ -1,4 +1,4 @@
-const { parseDeep } = require("../../helpers/helpers");
+const { generateImageDestination } = require("../../helpers/helpers");
 const {
     getAllCertificates,
     createCertificate,
@@ -14,7 +14,6 @@ const {
 } = require("../../utils/firebaseStorage");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
-const { generateImageDestination } = require("../../helpers/helpers");
 
 async function httpGetAllCertificates(req, res) {
     let certificates = undefined;
@@ -105,6 +104,7 @@ async function httpCreateCertificate(req, res) {
                 blurHash: cardImage.blurHash,
                 destination: destination,
                 url: imageUrl,
+                size: file.size, // Add size property
             },
         };
 
@@ -129,25 +129,41 @@ async function httpUpdateCertificate(req, res) {
     const image = req.file;
 
     try {
-        //1 - get certificate by id
         const oldCertificate = await getCertificateById(newCertificate.id);
-
-        const oldDestination = oldCertificate.cardImage.destination;
+        console.log("=== Updating Certificate ===");
+        console.log(
+            "Old Certificate:",
+            JSON.stringify(oldCertificate, null, 2)
+        );
+        console.log(
+            "New Certificate Data:",
+            JSON.stringify(newCertificate, null, 2)
+        );
+        console.log(
+            "Uploaded Image:",
+            image ? image.originalname : "No new image uploaded"
+        );
 
         if (image) {
+            console.log("Image has changed, updating image.");
+            const oldDestination = oldCertificate.cardImage.destination;
             const destination = generateImageDestination(
                 newCertificate.name,
                 image
             );
-            const newImageUrl = await getDownloadURLFromFirebase(destination);
-            const newCardImage = await getCardImage(newCertificate.name, image);
 
-            //2 - delete old image from firebase
             await deleteImageFromFirebase(oldDestination);
-            //3 - upload new image to firebase
-            await uploadImageToFirebase(image, destination);
+            console.log("Deleted old image from Firebase.");
 
-            //4 - update certificate with new image details
+            await uploadImageToFirebase(image, destination);
+            console.log("Uploaded new image to Firebase.");
+
+            const newImageUrl = await getDownloadURLFromFirebase(destination);
+            console.log("New image URL from Firebase obtained.");
+
+            const newCardImage = await getCardImage(newCertificate.name, image);
+            console.log("New card image data obtained.");
+
             newCertificate = {
                 ...newCertificate,
                 cardImage: {
@@ -155,26 +171,30 @@ async function httpUpdateCertificate(req, res) {
                     blurHash: newCardImage.blurHash,
                     destination: destination,
                     url: newImageUrl,
+                    size: image.size, // Add size property
                 },
             };
 
-            console.log("Current certificate for update:", newCertificate);
+            console.log("Updated certificate data prepared.");
+            await updateCertificate(newCertificate);
+        } else {
+            console.log("Image has not changed, skipping image update.");
+            await updateCertificate({
+                ...oldCertificate,
+                ...newCertificate,
+            });
+            console.log(
+                "Certificate updated in database without image change."
+            );
         }
-
-        //6 - update certificate
-        console.log("Current certificate for update:", newCertificate);
-        const result = await updateCertificate(oldCertificate);
-        console.log(
-            "The certificate was successfully updated:",
-            oldCertificate
-        );
     } catch (err) {
-        console.error(err.message);
+        console.error("Error updating certificate:", err.message);
         return res.status(400).json({
-            error: `Something went wrong`,
+            error: `Something went wrong: ${err.message}`,
         });
     }
 
+    console.log("=== Certificate Update Complete ===");
     return res.status(200).json(newCertificate);
 }
 

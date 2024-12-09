@@ -19,12 +19,12 @@ async function createCertificate(certificateData) {
 
 async function updateCertificate(certificateData) {
     try {
-        const result = await Certificate.updateOne(
-            { _id: certificateData._id },
+        const result = await CertificateSchema.updateOne(
+            { _id: certificateData.id },
             { $set: certificateData }
         );
         console.log("Certificate updated in database");
-        return { id: certificateData._id, ...certificateData };
+        return { id: certificateData.id, ...certificateData };
     } catch (err) {
         console.log(`Could not update Certificate ${err}`);
         throw err;
