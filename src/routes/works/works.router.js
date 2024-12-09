@@ -1,18 +1,18 @@
 const express = require("express");
 const {
-    httpGetAllWorks,
     httpGetImagesWork,
     httpGetCategoriesWorks,
     httpCreatedWork: httpCreateWork,
     httpGetTechnologies,
     httpUpdatedWork,
     httpDeleteWork,
+    httpGetFilteredAndSortedWorks,
 } = require("./works.controller");
 const worksRouter = express.Router();
 
 const upload = require("../../utils/multerConfig");
 
-worksRouter.get("/", httpGetAllWorks);
+worksRouter.get("/", httpGetFilteredAndSortedWorks);
 worksRouter.delete("/delete", httpDeleteWork);
 worksRouter.post(
     "/create",

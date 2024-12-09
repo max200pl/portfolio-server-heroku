@@ -1,32 +1,24 @@
 const { Work, parseDeep } = require("../../helpers/helpers");
 const {
-    getAllWorks,
     getAllCategories,
     getTechnologies,
     createWork,
     updateWork,
     deleteWork,
+    getFilteredAndSortedWorks,
 } = require("../../models/works.model");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
-const { sortWorksByDateDesc } = require("../../utils/works");
 
-async function httpGetAllWorks(req, res) {
-    let works = undefined;
+async function httpGetFilteredAndSortedWorks(req, res) {
     const { category } = req.query;
-    console.log(category, "category");
 
     try {
-        works = await getAllWorks();
-        if (category) {
-            works = works.filter((work) => work.category === category);
-        }
-        const sortedWorksByDateDesc = await sortWorksByDateDesc(works);
-        res.status(200).json(sortedWorksByDateDesc);
-    } catch (error) {
-        res.status(400).json({
-            error: `Something went wrong ${error}`,
-        });
+        const works = await getFilteredAndSortedWorks(category);
+        console.log(`Returned ${works.length} works`);
+        res.status(200).json(works);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 }
 
@@ -134,7 +126,7 @@ async function httpDeleteWork(req, res) {
 }
 
 module.exports = {
-    httpGetAllWorks,
+    httpGetFilteredAndSortedWorks,
     httpGetImagesWork,
     httpGetCategoriesWorks,
     httpCreatedWork,

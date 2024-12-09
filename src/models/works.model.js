@@ -34,22 +34,17 @@ async function deleteWork(id) {
     }
 }
 
-async function getAllWorks() {
-    return await WorkSchema.find(
-        {},
-        {
-            __v: 0,
-        }
-    );
-}
-
-async function getGetFilterWorks(category) {
-    return await WorkSchema.find(
-        { category: category }, // which fields are included in the response
-        {
-            __v: 0,
-        }
-    );
+async function getFilteredAndSortedWorks(category) {
+    try {
+        const query = category ? { category } : {};
+        const works = await WorkSchema.find(query).sort({ dateFinished: -1 }); // Фильтрация по категории и сортировка по убыванию даты
+        return works;
+    } catch (err) {
+        console.error(
+            `Error fetching filtered and sorted works: ${err.message}`
+        );
+        throw err;
+    }
 }
 
 async function getAllCategories() {
@@ -67,11 +62,10 @@ async function getTechnologies() {
 }
 
 module.exports = {
-    getAllWorks,
+    getFilteredAndSortedWorks,
     deleteWork,
     createWork,
     updateWork,
     getAllCategories,
-    getGetFilterWorks,
     getTechnologies,
 };
