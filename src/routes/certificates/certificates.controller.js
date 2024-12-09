@@ -34,28 +34,7 @@ async function httpGetAllCertificates(req, res) {
     }
 }
 
-async function httpGetImagesCertificate(req, res) {
-    const { project, name } = req.query;
-
-    const options = {
-        root: path.join(__dirname, "../../images/" + project),
-        dotfiles: "deny",
-        headers: {
-            "x-timestamp": Date.now(),
-            "x-sent": true,
-        },
-    };
-
-    return res.sendFile(name, options, function (err) {
-        if (err) {
-            console.log(err.message);
-        } else {
-            console.log(`Sent: ${project}__${name}____`);
-        }
-    });
-}
-
-async function httpGetCategoriesCertificates(req, res) {
+async function httpGetCategoriesCertificates(res) {
     try {
         const allCategories = await getAllCategoryCertificates();
 
@@ -207,7 +186,7 @@ async function httpDeleteCertificate(req, res) {
 
         await deleteImageFromFirebase(cardImage.destination);
 
-        const result = await deleteCertificate(id); // Define the result variable
+        await deleteCertificate(id); // Define the result variable
 
         console.info(`
             The certificate was successfully deleted: ${id}
@@ -222,32 +201,8 @@ async function httpDeleteCertificate(req, res) {
     return res.status(200).json(id);
 }
 
-async function httpGetImagesCertificate(req, res) {
-    const { project, name } = req.query;
-
-    console.log("Project:", project);
-
-    const options = {
-        root: path.join(__dirname, "../../images/" + project),
-        dotfiles: "deny",
-        headers: {
-            "x-timestamp": Date.now(),
-            "x-sent": true,
-        },
-    };
-
-    return res.sendFile(name, options, function (err) {
-        if (err) {
-            console.log(err.message);
-        } else {
-            console.log(`Sent: ${project}__${name}____`);
-        }
-    });
-}
-
 module.exports = {
     httpGetAllCertificates,
-    httpGetImagesCertificate,
     httpGetCategoriesCertificates,
     httpCreateCertificate,
     httpUpdateCertificate,
