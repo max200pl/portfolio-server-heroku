@@ -6,7 +6,6 @@ const {
     httpGetCategoriesCertificates,
     httpDeleteCertificate,
     httpUpdateCertificate,
-    httpGetImagesCertificate,
 } = require("./certificates.controller");
 
 const router = express.Router();
@@ -38,7 +37,5 @@ router.put(
     },
     httpUpdateCertificate
 );
-
-router.get("/image", httpGetImagesCertificate);
 
 module.exports = router;
