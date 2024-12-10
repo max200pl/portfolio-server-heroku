@@ -33,18 +33,11 @@ async function httpGetAllCertificates(req, res) {
 
 async function httpGetCategoriesCertificates(res) {
     try {
-        const allCategories = await getAllCategoryCertificates();
-
-        if (!allCategories) {
-            return res.status(400).json({
-                error: `No categories found`,
-            });
-        }
-
-        res.status(200).json(allCategories);
+        const allCategories = await getAllCertificateCategories();
+        return res.status(200).json(allCategories);
     } catch (error) {
-        return res.status(400).json({
-            error: `Something went wrong`,
+        return res.status(500).json({
+            error: `Something went wrong: ${error.message}`,
         });
     }
 }
@@ -170,7 +163,7 @@ async function httpUpdateCertificate(req, res) {
         }
     } catch (err) {
         console.error("Error updating certificate:", err.message);
-        return res.status(400).json({
+        return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
     }
@@ -190,13 +183,11 @@ async function httpDeleteCertificate(req, res) {
 
         await deleteCertificate(id); // Define the result variable
 
-        console.info(`
-            The certificate was successfully deleted: ${id}
-        `);
+        console.info(`The certificate was successfully deleted: ${id}`);
     } catch (err) {
         console.error(err.message);
-        return res.status(400).json({
-            error: `Something went wrong`,
+        return res.status(500).json({
+            error: `Something went wrong: ${err.message}`,
         });
     }
 
