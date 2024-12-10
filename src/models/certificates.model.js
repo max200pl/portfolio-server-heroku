@@ -19,7 +19,7 @@ async function createCertificate(certificateData) {
 
 async function updateCertificate(certificateData) {
     try {
-        const result = await CertificateSchema.updateOne(
+        await CertificateSchema.updateOne(
             { _id: certificateData.id },
             { $set: certificateData }
         );

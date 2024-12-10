@@ -64,7 +64,11 @@ async function httpCreateCertificate(req, res) {
     }
 
     try {
-        const destination = generateImageDestination(name, file);
+        const destination = generateImageDestination(
+            "certificates",
+            name,
+            file
+        );
         console.log("Current image destination for create:", destination);
 
         const cardImage = await getCardImage(name, file);
@@ -127,6 +131,7 @@ async function httpUpdateCertificate(req, res) {
             console.log("Image has changed, updating image.");
             const oldDestination = oldCertificate.cardImage.destination;
             const destination = generateImageDestination(
+                "certificates",
                 newCertificate.name,
                 image
             );
