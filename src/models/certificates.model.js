@@ -49,13 +49,19 @@ async function getCertificateById(id) {
     }
 }
 
-async function getAllCertificates() {
-    return await CertificateSchema.find(
-        {},
-        {
-            __v: 0,
-        }
-    );
+async function getFilteredAndSortedCertificates(category) {
+    try {
+        const query = category ? { category } : {};
+        const certificates = await CertificateSchema.find(query).sort({
+            dateFinished: -1,
+        }); // Фильтрация по категории и сортировка по убыванию даты
+        return certificates;
+    } catch (err) {
+        console.error(
+            `Error fetching filtered and sorted certificates: ${err.message}`
+        );
+        throw err;
+    }
 }
 
 async function getGetFilterCertificates(category) {
@@ -82,7 +88,7 @@ async function getTechnologies() {
 }
 
 module.exports = {
-    getAllCertificates,
+    getFilteredAndSortedCertificates,
     deleteCertificate,
     createCertificate,
     updateCertificate,

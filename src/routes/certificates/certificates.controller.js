@@ -21,14 +21,11 @@ async function httpGetAllCertificates(req, res) {
     console.log(category, "category");
 
     try {
-        certificates = await getAllCertificates();
-        // if (category) {
-        //     Certificates = Certificates.filter((certificate) => certificate.category === category);
-        // }
-        // const sortedCertificatesByDateDesc = await sortCertificatesByDateDesc(Certificates);
+        certificates = await getFilteredAndSortedCertificates(category);
+        console.log(`Returned ${certificates.length} certificates`);
         res.status(200).json(certificates);
     } catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             error: `Something went wrong ${error}`,
         });
     }
