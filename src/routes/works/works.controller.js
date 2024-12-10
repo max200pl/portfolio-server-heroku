@@ -123,8 +123,8 @@ async function httpUpdatedWork(req, res) {
     try {
         const oldWork = await getWorkById(newWork.id);
         console.log("=== Updating Work ===");
-        console.log("Old Work:", JSON.stringify(oldWork, null, 2));
-        console.log("New Work Data:", JSON.stringify(newWork, null, 2));
+        console.log("Old Work ID:", oldWork.id);
+        console.log("New Work Data:", newWork);
         console.log(
             "Uploaded Image:",
             image ? image.originalname : "No new image uploaded"
