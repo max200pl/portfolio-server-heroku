@@ -47,8 +47,17 @@ async function getFilteredAndSortedWorks(category) {
     }
 }
 
-async function getAllCategories() {
-    return await WorkSchema.find({}, { category: 1, _id: 0 });
+async function getAllWorkCategories() {
+    try {
+        const categories = await WorkSchema.find({}, { category: 1, _id: 0 });
+        if (!categories.length) {
+            throw new Error("No categories found");
+        }
+        return categories;
+    } catch (err) {
+        console.error(`Error fetching categories: ${err.message}`);
+        throw err;
+    }
 }
 
 async function getTechnologies() {
@@ -74,7 +83,7 @@ module.exports = {
     deleteWork,
     createWork,
     updateWork,
-    getAllCategories,
+    getAllWorkCategories,
     getTechnologies,
     getWorkById,
 };

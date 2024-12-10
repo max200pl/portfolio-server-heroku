@@ -51,24 +51,31 @@ async function httpGetImagesWork(req, res) {
     });
 }
 async function httpGetCategoriesWorks(req, res) {
-    const allCategories = await getAllCategories();
-
-    if (!allCategories)
-        return res.status(400).json({
-            error: `Something went wrong`,
+    try {
+        const allCategories = await getAllWorkCategories();
+        return res.status(200).json(allCategories);
+    } catch (err) {
+        return res.status(500).json({
+            error: `Something went wrong: ${err.message}`,
         });
-
-    return res.status(200).json(allCategories);
+    }
 }
 async function httpGetTechnologies(req, res) {
-    const technologies = await getTechnologies();
+    try {
+        const technologies = await getTechnologies();
 
-    if (!technologies)
-        return res.status(400).json({
-            error: `Something went wrong`,
+        if (!technologies) {
+            return res.status(500).json({
+                error: `Something went wrong`,
+            });
+        }
+
+        return res.status(200).json(technologies[0]);
+    } catch (err) {
+        return res.status(500).json({
+            error: `Something went wrong: ${err.message}`,
         });
-
-    return res.status(200).json(technologies[0]);
+    }
 }
 
 async function httpCreateWork(req, res) {
@@ -167,7 +174,7 @@ async function httpUpdatedWork(req, res) {
         }
     } catch (err) {
         console.error("Error updating work:", err.message);
-        return res.status(400).json({
+        return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
     }
@@ -189,7 +196,9 @@ async function httpDeleteWork(req, res) {
         console.info(`The work was successfully deleted: ${id}`);
     } catch (err) {
         console.error(err.message);
-        return res.status(400).json({ error: `Something went wrong` });
+        return res
+            .status(500)
+            .json({ error: `Something went wrong: ${err.message}` });
     }
 
     return res.status(200).json(id);
