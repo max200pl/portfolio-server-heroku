@@ -50,79 +50,17 @@ function parseDeep(data) {
     return parsedObject;
 }
 
-function generateImageDestination(name, file) {
+function generateImageDestination(type, name, file) {
     const uniqueId = uuidv4({
         rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
     });
     const camelCaseName = toCamelCase(name);
     const fileType = path.extname(file.originalname);
-    return `images/certificates/${camelCaseName}_${uniqueId}${fileType}`;
-}
-
-class Work {
-    constructor({
-        name = "",
-        dateFinished = undefined,
-        category = "",
-        client = "",
-        link = undefined,
-        frontTech = [],
-        backTech = [],
-        cardImage = undefined,
-        images = [],
-    }) {
-        this.name = name;
-        this.dateFinished = dateFinished;
-        this.category = category;
-        this.client = client;
-        this.link = link;
-        this.frontTech = frontTech;
-        this.backTech = backTech;
-        this.cardImage = cardImage;
-        this.images = images;
-    }
-
-    static create(data) {
-        const newWork = new Work(data);
-        console.log(newWork, "newWork");
-        console.log(parseDeep(newWork), "parseDeep(newWork)");
-        return parseDeep(newWork);
-    }
-}
-
-class Certificate {
-    constructor({
-        name = "",
-        dateFinished = undefined,
-        category = {
-            id: "",
-            type_name: "",
-            description: "",
-        },
-        link = undefined,
-        cardImage = undefined,
-        images = [],
-    }) {
-        this.name = name;
-        this.dateFinished = dateFinished;
-        this.category = category;
-        this.link = link;
-        this.cardImage = cardImage;
-        this.images = images;
-    }
-
-    static create(data) {
-        const newCertificate = new Certificate(data);
-        console.log(newCertificate, "newCertificate");
-        console.log(parseDeep(newCertificate), "parseDeep(newCertificate)");
-        return parseDeep(newCertificate);
-    }
+    return `images/${type}/${camelCaseName}_${uniqueId}${fileType}`;
 }
 
 module.exports = {
     parseDeep,
     toCamelCase,
     generateImageDestination,
-    Work,
-    Certificate,
 };

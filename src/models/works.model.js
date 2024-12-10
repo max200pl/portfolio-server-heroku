@@ -14,7 +14,7 @@ async function createWork(work) {
 async function updateWork(work) {
     try {
         const result = await WorkSchema.updateOne(
-            { _id: work._id },
+            { _id: work.id },
             { $set: work }
         );
         console.log("Work updated in database");
@@ -61,6 +61,14 @@ async function getTechnologies() {
     );
 }
 
+async function getWorkById(id) {
+    try {
+        return await WorkSchema.findById(id);
+    } catch (err) {
+        console.log(`Could not find Work ${err}`);
+    }
+}
+
 module.exports = {
     getFilteredAndSortedWorks,
     deleteWork,
@@ -68,4 +76,5 @@ module.exports = {
     updateWork,
     getAllCategories,
     getTechnologies,
+    getWorkById,
 };

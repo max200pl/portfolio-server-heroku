@@ -1,4 +1,4 @@
-const { Work, parseDeep } = require("../../helpers/helpers");
+const { Work, generateImageDestination } = require("../../helpers/helpers");
 const {
     getAllCategories,
     getTechnologies,
@@ -6,7 +6,13 @@ const {
     updateWork,
     deleteWork,
     getFilteredAndSortedWorks,
+    getWorkById,
 } = require("../../models/works.model");
+const {
+    uploadImageToFirebase,
+    deleteImageFromFirebase,
+    getDownloadURLFromFirebase,
+} = require("../../utils/firebaseStorage");
 const { getCardImage } = require("../../utils/images");
 const path = require("path");
 
@@ -65,61 +71,125 @@ async function httpGetTechnologies(req, res) {
     return res.status(200).json(technologies[0]);
 }
 
-async function httpCreatedWork(req, res) {
+async function httpCreateWork(req, res) {
     const work = req.body;
     const image = req.file;
 
-    if (!work || !image)
-        return res.status(400).json({
-            error: `Something went wrong`,
-        });
+    if (!work || !image) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
 
     try {
-        work.cardImage = await getCardImage(work.name, image);
+        const destination = generateImageDestination("works", work.name, image);
+        console.log("Current image destination for create:", destination);
 
-        const result = await createWork(Work.create({ ...work }));
+        const cardImage = await getCardImage(work.name, image);
 
+        await uploadImageToFirebase(image, destination);
+        const imageUrl = await getDownloadURLFromFirebase(destination);
+
+        work.cardImage = {
+            name: cardImage.name,
+            blurHash: cardImage.blurHash,
+            destination: destination,
+            url: imageUrl,
+            size: image.size,
+        };
+
+        const result = await createWork({ ...work });
         console.log("Create work success:", result);
 
         return res.status(201).json({ id: result._id, ...work });
     } catch (err) {
-        console.error(err.message);
+        console.error("Error creating work:", err.message);
+        res.status(500).json({
+            message: `Invalid input: ${err.message}`,
+            details: err.errors,
+        });
     }
 }
 
 async function httpUpdatedWork(req, res) {
-    const work = parseDeep(req.body);
+    let newWork = req.body;
     const image = req.file;
 
     try {
+        const oldWork = await getWorkById(newWork.id);
+        console.log("=== Updating Work ===");
+        console.log("Old Work:", JSON.stringify(oldWork, null, 2));
+        console.log("New Work Data:", JSON.stringify(newWork, null, 2));
+        console.log(
+            "Uploaded Image:",
+            image ? image.originalname : "No new image uploaded"
+        );
+
         if (image) {
-            work.cardImage = await getCardImage(work.name, image);
+            console.log("Image has changed, updating image.");
+            const oldDestination = oldWork.cardImage.destination;
+            const destination = generateImageDestination(
+                "works",
+                newWork.name,
+                image
+            );
+
+            await deleteImageFromFirebase(oldDestination);
+            console.log("Deleted old image from Firebase.");
+
+            await uploadImageToFirebase(image, destination);
+            console.log("Uploaded new image to Firebase.");
+
+            const newImageUrl = await getDownloadURLFromFirebase(destination);
+            console.log("New image URL from Firebase obtained.");
+
+            const newCardImage = await getCardImage(newWork.name, image);
+            console.log("New card image data obtained.");
+
+            newWork = {
+                ...newWork,
+                cardImage: {
+                    name: newCardImage.name,
+                    blurHash: newCardImage.blurHash,
+                    destination: destination,
+                    url: newImageUrl,
+                    size: image.size,
+                },
+            };
+
+            console.log("Updated work data prepared.");
+            await updateWork(newWork);
+        } else {
+            console.log("Image has not changed, skipping image update.");
+            await updateWork({
+                ...oldWork,
+                ...newWork,
+            });
+            console.log("Work updated in database without image change.");
         }
-        console.log("Current work for update:", work);
-        const result = await updateWork(work);
-        console.log("The work was successfully updated:", result);
     } catch (err) {
-        console.error(err.message);
+        console.error("Error updating work:", err.message);
         return res.status(400).json({
-            error: `Something went wrong`,
+            error: `Something went wrong: ${err.message}`,
         });
     }
 
-    return res.status(200).json(work);
+    console.log("=== Work Update Complete ===");
+    return res.status(200).json(newWork);
 }
 
 async function httpDeleteWork(req, res) {
     const { id } = req.query;
+    console.info("Current work for delete:", id);
 
     try {
-        console.log("Current ID for delete:", id);
-        const result = await deleteWork(id);
-        console.log("The work was successfully updated:", result);
+        const { cardImage } = await getWorkById(id);
+
+        await deleteImageFromFirebase(cardImage.destination);
+        await deleteWork(id);
+
+        console.info(`The work was successfully deleted: ${id}`);
     } catch (err) {
         console.error(err.message);
-        return res.status(400).json({
-            error: `Something went wrong`,
-        });
+        return res.status(400).json({ error: `Something went wrong` });
     }
 
     return res.status(200).json(id);
@@ -129,7 +199,7 @@ module.exports = {
     httpGetFilteredAndSortedWorks,
     httpGetImagesWork,
     httpGetCategoriesWorks,
-    httpCreatedWork,
+    httpCreateWork,
     httpUpdatedWork,
     httpGetTechnologies,
     httpDeleteWork,

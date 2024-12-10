@@ -2,7 +2,7 @@ const express = require("express");
 const {
     httpGetImagesWork,
     httpGetCategoriesWorks,
-    httpCreatedWork: httpCreateWork,
+    httpCreateWork, // Corrected import
     httpGetTechnologies,
     httpUpdatedWork,
     httpDeleteWork,
@@ -23,13 +23,13 @@ worksRouter.post(
         }
         next();
     },
-    httpCreateWork
+    httpCreateWork // Corrected function name
 );
 worksRouter.put(
     "/update",
     upload,
     (req, res, next) => {
-        if (!req.body || !req.file) {
+        if (!req.body) {
             return res.status(400).json({ error: "Invalid request data" });
         }
         next();
