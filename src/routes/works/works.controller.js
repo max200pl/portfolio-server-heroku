@@ -1,12 +1,12 @@
-const { Work, generateImageDestination } = require("../../helpers/helpers");
+const { generateImageDestination } = require("../../helpers/helpers");
 const {
-    getAllCategories,
     getTechnologies,
     createWork,
     updateWork,
     deleteWork,
     getFilteredAndSortedWorks,
     getWorkById,
+    getAllWorkCategories,
 } = require("../../models/works.model");
 const {
     uploadImageToFirebase,

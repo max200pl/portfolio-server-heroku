@@ -5,6 +5,7 @@ const {
     deleteCertificate,
     getCertificateById,
     getFilteredAndSortedCertificates,
+    getAllCertificateCategories,
 } = require("../../models/certificates.model");
 const {
     uploadImageToFirebase,
@@ -30,14 +31,14 @@ async function httpGetAllCertificates(req, res) {
     }
 }
 
-async function httpGetCategoriesCertificates(res) {
+async function httpGetCategoriesCertificates(req, res) {
     try {
-        const allCategories = await getAllCertificateCategories();
-        return res.status(200).json(allCategories);
-    } catch (error) {
-        return res.status(500).json({
-            error: `Something went wrong: ${error.message}`,
-        });
+        const categories = await getAllCertificateCategories();
+        return res.status(200).json(categories);
+    } catch (err) {
+        return res
+            .status(500)
+            .json({ error: `Something went wrong: ${err.message}` });
     }
 }
 
@@ -104,6 +105,7 @@ async function httpUpdateCertificate(req, res) {
     try {
         console.log("=== Updating Certificate ===");
         const oldCertificate = await getCertificateById(newCertificate.id);
+
         if (!oldCertificate) {
             console.info("Certificate not found:", newCertificate.id);
             console.info("=== Certificate Update Complete ===");

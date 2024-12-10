@@ -61,22 +61,13 @@ async function getFilteredAndSortedCertificates(category) {
         const query = category ? { category } : {};
         const certificates = await CertificateSchema.find(query).sort({
             dateFinished: -1,
-        }); // Фильтрация по категории и сортировка по убыванию даты
+        }); // Filtering by category and sorting by date
         return certificates;
     } catch (err) {
         console.error(
             `Error fetching filtered and sorted certificates: ${err.message}`
         );
     }
-}
-
-async function getGetFilterCertificates(category) {
-    return await CertificateSchema.find(
-        { category: category }, // which fields are included in the response
-        {
-            __v: 0,
-        }
-    );
 }
 
 async function getAllCertificateCategories() {
@@ -107,7 +98,6 @@ module.exports = {
     createCertificate,
     updateCertificate,
     getAllCertificateCategories,
-    getGetFilterCertificates,
     getTechnologies,
     getCertificateById,
 };
