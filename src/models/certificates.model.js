@@ -73,8 +73,17 @@ async function getGetFilterCertificates(category) {
     );
 }
 
-async function getAllCategoryCertificates() {
-    return await CategoryCertificate.find();
+async function getAllCertificateCategories() {
+    try {
+        const categories = await CategoryCertificate.find();
+        if (!categories.length) {
+            throw new Error("No categories found");
+        }
+        return categories;
+    } catch (err) {
+        console.error(`Error fetching categories: ${err.message}`);
+        throw err;
+    }
 }
 
 async function getTechnologies() {
@@ -92,7 +101,7 @@ module.exports = {
     deleteCertificate,
     createCertificate,
     updateCertificate,
-    getAllCategoryCertificates,
+    getAllCertificateCategories,
     getGetFilterCertificates,
     getTechnologies,
     getCertificateById,
