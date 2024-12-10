@@ -86,12 +86,14 @@ async function httpCreateWork(req, res) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // Ensure frontTech and backTech are arrays
+    work.frontTech = Array.isArray(work.frontTech) ? work.frontTech : [];
+    work.backTech = Array.isArray(work.backTech) ? work.backTech : [];
+
     try {
+        console.log("=== Creating Work ===");
         const destination = generateImageDestination("works", work.name, image);
-        console.log("Current image destination for create:", destination);
-
         const cardImage = await getCardImage(work.name, image);
-
         await uploadImageToFirebase(image, destination);
         const imageUrl = await getDownloadURLFromFirebase(destination);
 
@@ -106,6 +108,7 @@ async function httpCreateWork(req, res) {
         const result = await createWork({ ...work });
         console.log("Create work success:", result);
 
+        console.log("=== Work Creation Complete ===");
         return res.status(201).json({ id: result._id, ...work });
     } catch (err) {
         console.error("Error creating work:", err.message);
@@ -120,11 +123,30 @@ async function httpUpdatedWork(req, res) {
     let newWork = req.body;
     const image = req.file;
 
+    // Ensure frontTech and backTech are arrays
+    newWork.frontTech = Array.isArray(newWork.frontTech)
+        ? newWork.frontTech
+        : [];
+    newWork.backTech = Array.isArray(newWork.backTech) ? newWork.backTech : [];
+
     try {
-        const oldWork = await getWorkById(newWork.id);
         console.log("=== Updating Work ===");
+        const oldWork = await getWorkById(newWork.id);
+        if (!oldWork) {
+            console.info("Work not found:", newWork.id);
+            console.info("=== Work Update Complete ===");
+            return res.status(404).json({ error: "Work not found" });
+        }
+
         console.log("Old Work ID:", oldWork.id);
-        console.log("New Work Data:", newWork);
+        console.log(
+            "Old Work Data from Database:",
+            JSON.parse(JSON.stringify(oldWork))
+        ); // Convert to regular object
+        console.log(
+            "New Work Data from Front-end:",
+            JSON.parse(JSON.stringify(newWork))
+        );
         console.log(
             "Uploaded Image:",
             image ? image.originalname : "No new image uploaded"
@@ -185,24 +207,34 @@ async function httpUpdatedWork(req, res) {
 
 async function httpDeleteWork(req, res) {
     const { id } = req.query;
+    console.info("=== Deleting Work ===");
     console.info("Current work for delete:", id);
 
     try {
-        const { cardImage } = await getWorkById(id);
+        const work = await getWorkById(id);
+        if (!work) {
+            console.info("Work not found:", id);
+            console.info("=== Work Deletion Complete ===");
+            return res.status(404).json({ error: "Work not found" });
+        }
 
+        const { cardImage } = work;
+        console.log("Deleting image from Firebase:", cardImage.destination);
         await deleteImageFromFirebase(cardImage.destination);
         await deleteWork(id);
-
         console.info(`The work was successfully deleted: ${id}`);
     } catch (err) {
-        console.error(err.message);
+        console.error("Error deleting work:", err.message);
+        console.info("=== Work Deletion Complete ===");
         return res
             .status(500)
             .json({ error: `Something went wrong: ${err.message}` });
     }
 
+    console.info("=== Work Deletion Complete ===");
     return res.status(200).json(id);
 }
+console.info("=== End of Work Controller ===");
 
 module.exports = {
     httpGetFilteredAndSortedWorks,

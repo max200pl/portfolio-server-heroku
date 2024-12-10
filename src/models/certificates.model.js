@@ -13,21 +13,23 @@ async function createCertificate(certificateData) {
         if (err.errors) {
             console.error("Validation errors:", err.errors);
         }
-        throw err;
     }
 }
 
 async function updateCertificate(certificateData) {
     try {
-        await CertificateSchema.updateOne(
+        const result = await CertificateSchema.updateOne(
             { _id: certificateData.id },
             { $set: certificateData }
         );
+        if (result.nModified === 0) {
+            console.log(`Certificate not found with ID ${certificateData.id}`);
+            return null;
+        }
         console.log("Certificate updated in database");
         return { id: certificateData.id, ...certificateData };
     } catch (err) {
-        console.log(`Could not update Certificate ${err}`);
-        throw err;
+        console.log(`Error updating Certificate with ID ${certificateData.id}`);
     }
 }
 
@@ -37,15 +39,20 @@ async function deleteCertificate(id) {
         console.log("Certificate deleted from database successfully.");
         return result;
     } catch (err) {
-        console.log(`Could not deleted Certificate ${err}`);
+        console.log(`Could not delete Certificate: ${err.message}`);
     }
 }
 
 async function getCertificateById(id) {
     try {
-        return await CertificateSchema.findById(id);
+        const certificate = await CertificateSchema.findById(id);
+        if (!certificate) {
+            console.log(`Certificate not found with ID ${id}`);
+            return null;
+        }
+        return certificate;
     } catch (err) {
-        console.log(`Could not find Certificate ${err}`);
+        console.log(`Error finding Certificate with ID ${id}`);
     }
 }
 
@@ -60,7 +67,6 @@ async function getFilteredAndSortedCertificates(category) {
         console.error(
             `Error fetching filtered and sorted certificates: ${err.message}`
         );
-        throw err;
     }
 }
 
@@ -82,7 +88,6 @@ async function getAllCertificateCategories() {
         return categories;
     } catch (err) {
         console.error(`Error fetching categories: ${err.message}`);
-        throw err;
     }
 }
 

@@ -17,10 +17,14 @@ async function updateWork(work) {
             { _id: work.id },
             { $set: work }
         );
+        if (result.nModified === 0) {
+            console.log(`Work not found with ID ${work.id}`);
+            return null;
+        }
         console.log("Work updated in database");
         return result;
     } catch (err) {
-        console.log(`Could not updated work ${err}`);
+        console.log(`Error updating Work with ID ${work.id}`);
     }
 }
 
@@ -43,7 +47,6 @@ async function getFilteredAndSortedWorks(category) {
         console.error(
             `Error fetching filtered and sorted works: ${err.message}`
         );
-        throw err;
     }
 }
 
@@ -56,7 +59,6 @@ async function getAllWorkCategories() {
         return categories;
     } catch (err) {
         console.error(`Error fetching categories: ${err.message}`);
-        throw err;
     }
 }
 
@@ -72,9 +74,14 @@ async function getTechnologies() {
 
 async function getWorkById(id) {
     try {
-        return await WorkSchema.findById(id);
+        const work = await WorkSchema.findById(id);
+        if (!work) {
+            console.log(`Work not found with ID ${id}`);
+            return null;
+        }
+        return work;
     } catch (err) {
-        console.log(`Could not find Work ${err}`);
+        console.log(`Error finding Work with ID ${id}: ${err.message}`);
     }
 }
 

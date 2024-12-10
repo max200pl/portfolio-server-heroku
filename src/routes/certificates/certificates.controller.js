@@ -1,11 +1,10 @@
 const { generateImageDestination } = require("../../helpers/helpers");
 const {
-    getAllCertificates,
     createCertificate,
     updateCertificate,
     deleteCertificate,
-    getAllCategoryCertificates,
     getCertificateById,
+    getFilteredAndSortedCertificates,
 } = require("../../models/certificates.model");
 const {
     uploadImageToFirebase,
@@ -46,6 +45,7 @@ async function httpCreateCertificate(req, res) {
     const { name, dateFinished, category, link } = req.body;
     const file = req.file;
 
+    console.log("=== Creating Certificate ===");
     console.log("Current certificate for create:", req.body);
     console.log("Current image for create:", req.file);
 
@@ -64,7 +64,6 @@ async function httpCreateCertificate(req, res) {
         const cardImage = await getCardImage(name, file);
 
         await uploadImageToFirebase(file, destination);
-
         const imageUrl = await getDownloadURLFromFirebase(destination);
 
         const certificateData = {
@@ -77,14 +76,13 @@ async function httpCreateCertificate(req, res) {
                 blurHash: cardImage.blurHash,
                 destination: destination,
                 url: imageUrl,
-                size: file.size, // Add size property
+                size: file.size,
             },
         };
 
         console.log("Current certificate data for create:", certificateData);
 
         const result = await createCertificate(certificateData);
-
         console.log("The certificate was successfully created:", result);
 
         res.status(201).json({ id: result.id, ...result });
@@ -95,6 +93,8 @@ async function httpCreateCertificate(req, res) {
             details: err.errors,
         });
     }
+
+    console.log("=== Certificate Creation Complete ===");
 }
 
 async function httpUpdateCertificate(req, res) {
@@ -102,15 +102,22 @@ async function httpUpdateCertificate(req, res) {
     const image = req.file;
 
     try {
-        const oldCertificate = await getCertificateById(newCertificate.id);
         console.log("=== Updating Certificate ===");
+        const oldCertificate = await getCertificateById(newCertificate.id);
+        if (!oldCertificate) {
+            console.info("Certificate not found:", newCertificate.id);
+            console.info("=== Certificate Update Complete ===");
+            return res.status(404).json({ error: "Certificate not found" });
+        }
+
+        console.log("Old Certificate ID:", oldCertificate.id);
         console.log(
-            "Old Certificate:",
-            JSON.stringify(oldCertificate, null, 2)
-        );
+            "Old Certificate Data from Database:",
+            JSON.parse(JSON.stringify(oldCertificate))
+        ); // Convert to regular object
         console.log(
-            "New Certificate Data:",
-            JSON.stringify(newCertificate, null, 2)
+            "New Certificate Data from Front-end:",
+            JSON.parse(JSON.stringify(newCertificate))
         );
         console.log(
             "Uploaded Image:",
@@ -145,7 +152,7 @@ async function httpUpdateCertificate(req, res) {
                     blurHash: newCardImage.blurHash,
                     destination: destination,
                     url: newImageUrl,
-                    size: image.size, // Add size property
+                    size: image.size,
                 },
             };
 
@@ -174,25 +181,38 @@ async function httpUpdateCertificate(req, res) {
 
 async function httpDeleteCertificate(req, res) {
     const { id } = req.query;
+    console.info("=== Deleting Certificate ===");
     console.info("Current certificate for delete:", id);
 
     try {
-        const { cardImage } = await getCertificateById(id);
+        const certificate = await getCertificateById(id);
+        if (!certificate) {
+            console.info("Certificate not found:", id);
+            console.info("=== Certificate Deletion Complete ===");
+            return res.status(404).json({ error: "Certificate not found" });
+        }
+
+        const { cardImage } = certificate;
 
         await deleteImageFromFirebase(cardImage.destination);
 
-        await deleteCertificate(id); // Define the result variable
-
+        await deleteCertificate(id);
         console.info(`The certificate was successfully deleted: ${id}`);
     } catch (err) {
-        console.error(err.message);
+        console.error("Error deleting certificate:", err.message);
+        console.info("=== Certificate Deletion Complete ===");
         return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
     }
 
-    return res.status(200).json(id);
+    console.info("=== Certificate Deletion Complete ===");
+    return res
+        .status(200)
+        .json({ message: "Certificate deleted successfully", id });
 }
+
+console.info("=== End of Certificate Controller ===");
 
 module.exports = {
     httpGetAllCertificates,
