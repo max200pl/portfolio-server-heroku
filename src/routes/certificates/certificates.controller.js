@@ -34,6 +34,7 @@ async function httpGetAllCertificates(req, res) {
 async function httpGetCategoriesCertificates(req, res) {
     try {
         const categories = await getAllCertificateCategories();
+        console.log(`Returned ${categories.length} categories`);
         return res.status(200).json(categories);
     } catch (err) {
         return res

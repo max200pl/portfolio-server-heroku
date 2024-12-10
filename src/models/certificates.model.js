@@ -7,7 +7,7 @@ async function createCertificate(certificateData) {
         const certificate = new CertificateSchema(certificateData);
         const result = await certificate.save();
         console.log("Certificate created in database");
-        return { id: result._id, ...result._doc };
+        return { id: result.id, ...result._doc };
     } catch (err) {
         console.error(`Could not save Certificate: ${err.message}`);
         if (err.errors) {
