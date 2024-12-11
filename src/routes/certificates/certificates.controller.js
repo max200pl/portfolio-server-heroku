@@ -87,7 +87,7 @@ async function httpCreateCertificate(req, res) {
         const result = await createCertificate(certificateData);
         console.log("The certificate was successfully created:", result);
 
-        res.status(201).json({ id: result.id, ...result });
+        res.status(201).json(result);
     } catch (err) {
         console.error("Error creating certificate:", err.message);
         res.status(500).json({
@@ -105,15 +105,15 @@ async function httpUpdateCertificate(req, res) {
 
     try {
         console.log("=== Updating Certificate ===");
-        const oldCertificate = await getCertificateById(newCertificate.id);
+        const oldCertificate = await getCertificateById(newCertificate._id);
 
         if (!oldCertificate) {
-            console.info("Certificate not found:", newCertificate.id);
+            console.info("Certificate not found:", newCertificate._id);
             console.info("=== Certificate Update Complete ===");
             return res.status(404).json({ error: "Certificate not found" });
         }
 
-        console.log("Old Certificate ID:", oldCertificate.id);
+        console.log("Old Certificate ID:", oldCertificate._id);
         console.log(
             "Old Certificate Data from Database:",
             JSON.parse(JSON.stringify(oldCertificate))
@@ -183,14 +183,14 @@ async function httpUpdateCertificate(req, res) {
 }
 
 async function httpDeleteCertificate(req, res) {
-    const { id } = req.query;
+    const { _id } = req.query;
     console.info("=== Deleting Certificate ===");
-    console.info("Current certificate for delete:", id);
+    console.info("Current certificate for delete:", _id);
 
     try {
-        const certificate = await getCertificateById(id);
+        const certificate = await getCertificateById(_id);
         if (!certificate) {
-            console.info("Certificate not found:", id);
+            console.info("Certificate not found:", _id);
             console.info("=== Certificate Deletion Complete ===");
             return res.status(404).json({ error: "Certificate not found" });
         }
@@ -199,8 +199,8 @@ async function httpDeleteCertificate(req, res) {
 
         await deleteImageFromFirebase(cardImage.destination);
 
-        await deleteCertificate(id);
-        console.info(`The certificate was successfully deleted: ${id}`);
+        await deleteCertificate(_id);
+        console.info(`The certificate was successfully deleted: ${_id}`);
     } catch (err) {
         console.error("Error deleting certificate:", err.message);
         console.info("=== Certificate Deletion Complete ===");
@@ -212,7 +212,7 @@ async function httpDeleteCertificate(req, res) {
     console.info("=== Certificate Deletion Complete ===");
     return res
         .status(200)
-        .json({ message: "Certificate deleted successfully", id });
+        .json({ message: "Certificate deleted successfully", _id });
 }
 
 console.info("=== End of Certificate Controller ===");

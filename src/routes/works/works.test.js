@@ -1,10 +1,6 @@
-const request = require('supertest');
-const app = require('../../app');
-const {
-    mongoConnect,
-    mongoDisconnect
-} = require('../../db/mongo');
-
+const request = require("supertest");
+const app = require("../../app");
+const { mongoConnect, mongoDisconnect } = require("../../db/mongo");
 
 describe("API works", () => {
     beforeAll(async () => {
@@ -15,14 +11,14 @@ describe("API works", () => {
         await mongoDisconnect();
     });
 
-    describe('Get all of works', () => {
-        test('should response status 200 and return filtered works', async () => {
+    describe("Get all of works", () => {
+        test("should response status 200 and return filtered works", async () => {
             await request(app)
                 .get("/works")
                 .expect("Content-Type", /json/)
-                .expect(200)
-        })
-    })
+                .expect(200);
+        });
+    });
 
     // describe('Created a new Work', () => {
     //     test('should response status 200 and return filtered works', async () => {
@@ -32,4 +28,4 @@ describe("API works", () => {
     //             .expect(200)
     //     })
     // })
-})
+});

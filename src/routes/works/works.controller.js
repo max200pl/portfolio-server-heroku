@@ -105,11 +105,11 @@ async function httpCreateWork(req, res) {
             size: image.size,
         };
 
-        const result = await createWork({ ...work });
+        const result = await createWork(work);
         console.log("Create work success:", result);
 
         console.log("=== Work Creation Complete ===");
-        return res.status(201).json({ id: result._id, ...work });
+        return res.status(201).json(result);
     } catch (err) {
         console.error("Error creating work:", err.message);
         res.status(500).json({
@@ -131,14 +131,14 @@ async function httpUpdatedWork(req, res) {
 
     try {
         console.log("=== Updating Work ===");
-        const oldWork = await getWorkById(newWork.id);
+        const oldWork = await getWorkById(newWork._id);
         if (!oldWork) {
-            console.info("Work not found:", newWork.id);
+            console.info("Work not found:", newWork._id);
             console.info("=== Work Update Complete ===");
             return res.status(404).json({ error: "Work not found" });
         }
 
-        console.log("Old Work ID:", oldWork.id);
+        console.log("Old Work ID:", oldWork._id);
         console.log(
             "Old Work Data from Database:",
             JSON.parse(JSON.stringify(oldWork))
@@ -206,14 +206,14 @@ async function httpUpdatedWork(req, res) {
 }
 
 async function httpDeleteWork(req, res) {
-    const { id } = req.query;
+    const { _id } = req.query;
     console.info("=== Deleting Work ===");
-    console.info("Current work for delete:", id);
+    console.info("Current work for delete:", _id);
 
     try {
-        const work = await getWorkById(id);
+        const work = await getWorkById(_id);
         if (!work) {
-            console.info("Work not found:", id);
+            console.info("Work not found:", _id);
             console.info("=== Work Deletion Complete ===");
             return res.status(404).json({ error: "Work not found" });
         }
@@ -221,8 +221,8 @@ async function httpDeleteWork(req, res) {
         const { cardImage } = work;
         console.log("Deleting image from Firebase:", cardImage.destination);
         await deleteImageFromFirebase(cardImage.destination);
-        await deleteWork(id);
-        console.info(`The work was successfully deleted: ${id}`);
+        await deleteWork(_id);
+        console.info(`The work was successfully deleted: ${_id}`);
     } catch (err) {
         console.error("Error deleting work:", err.message);
         console.info("=== Work Deletion Complete ===");
@@ -232,7 +232,7 @@ async function httpDeleteWork(req, res) {
     }
 
     console.info("=== Work Deletion Complete ===");
-    return res.status(200).json(id);
+    return res.status(200).json({ message: "Work deleted successfully", _id });
 }
 console.info("=== End of Work Controller ===");
 

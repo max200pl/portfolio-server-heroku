@@ -19,7 +19,7 @@ async function createCertificate(certificateData) {
 async function updateCertificate(certificateData) {
     try {
         const result = await CertificateSchema.updateOne(
-            { _id: certificateData.id },
+            { _id: certificateData._id },
             { $set: certificateData }
         );
         if (result.nModified === 0) {
@@ -33,9 +33,9 @@ async function updateCertificate(certificateData) {
     }
 }
 
-async function deleteCertificate(id) {
+async function deleteCertificate(_id) {
     try {
-        const result = await CertificateSchema.deleteOne({ _id: id });
+        const result = await CertificateSchema.deleteOne({ _id });
         console.log("Certificate deleted from database successfully.");
         return result;
     } catch (err) {
@@ -43,16 +43,16 @@ async function deleteCertificate(id) {
     }
 }
 
-async function getCertificateById(id) {
+async function getCertificateById(_id) {
     try {
-        const certificate = await CertificateSchema.findById(id);
+        const certificate = await CertificateSchema.findById(_id);
         if (!certificate) {
-            console.log(`Certificate not found with ID ${id}`);
+            console.log(`Certificate not found with ID ${_id}`);
             return null;
         }
         return certificate;
     } catch (err) {
-        console.log(`Error finding Certificate with ID ${id}`);
+        console.log(`Error finding Certificate with ID ${_id}`);
     }
 }
 

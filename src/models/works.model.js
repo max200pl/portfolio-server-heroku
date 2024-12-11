@@ -14,23 +14,23 @@ async function createWork(work) {
 async function updateWork(work) {
     try {
         const result = await WorkSchema.updateOne(
-            { _id: work.id },
+            { _id: work._id },
             { $set: work }
         );
         if (result.nModified === 0) {
-            console.log(`Work not found with ID ${work.id}`);
+            console.log(`Work not found with ID ${work._id}`);
             return null;
         }
         console.log("Work updated in database");
         return result;
     } catch (err) {
-        console.log(`Error updating Work with ID ${work.id}`);
+        console.log(`Error updating Work with ID ${work._id}`);
     }
 }
 
-async function deleteWork(id) {
+async function deleteWork(_id) {
     try {
-        const result = await WorkSchema.deleteOne({ _id: id });
+        const result = await WorkSchema.deleteOne({ _id });
         console.log("Work deleted from database successfully.");
         return result;
     } catch (err) {
@@ -72,16 +72,16 @@ async function getTechnologies() {
     );
 }
 
-async function getWorkById(id) {
+async function getWorkById(_id) {
     try {
-        const work = await WorkSchema.findById(id);
+        const work = await WorkSchema.findById(_id);
         if (!work) {
-            console.log(`Work not found with ID ${id}`);
+            console.log(`Work not found with ID ${_id}`);
             return null;
         }
         return work;
     } catch (err) {
-        console.log(`Error finding Work with ID ${id}: ${err.message}`);
+        console.log(`Error finding Work with ID ${_id}: ${err.message}`);
     }
 }
 
