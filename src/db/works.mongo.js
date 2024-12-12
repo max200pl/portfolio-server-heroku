@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 
+const techSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    apply: { type: Number, required: true },
+});
+
 const imageSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
@@ -14,12 +19,12 @@ const imageSchema = new mongoose.Schema(
 const workSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
-        dateFinished: { type: Date },
+        dateFinished: { type: Date, required: true },
         category: { type: String, required: true },
         client: { type: String },
         link: { type: String },
-        frontTech: [{}],
-        backTech: [{}],
+        frontTech: { type: Map, of: [techSchema], required: false },
+        backTech: { type: Map, of: [techSchema], required: false },
         cardImage: imageSchema,
         images: [imageSchema],
     },

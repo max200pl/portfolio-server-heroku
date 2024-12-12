@@ -1,4 +1,7 @@
-const { generateImageDestination } = require("../../helpers/helpers");
+const {
+    generateImageDestination,
+    parseDeep,
+} = require("../../helpers/helpers");
 const {
     getTechnologies,
     createWork,
@@ -86,6 +89,16 @@ async function httpCreateWork(req, res) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // Temporary functionality to convert JSON strings to objects
+    try {
+        work.frontTech = JSON.parse(work.frontTech);
+        work.backTech = JSON.parse(work.backTech);
+    } catch (err) {
+        return res
+            .status(400)
+            .json({ error: "Invalid JSON format for tech fields" });
+    }
+
     // Ensure frontTech and backTech are arrays
     work.frontTech = Array.isArray(work.frontTech) ? work.frontTech : [];
     work.backTech = Array.isArray(work.backTech) ? work.backTech : [];
@@ -120,8 +133,18 @@ async function httpCreateWork(req, res) {
 }
 
 async function httpUpdatedWork(req, res) {
-    let newWork = req.body;
+    let newWork = parseDeep(req.body);
     const image = req.file;
+
+    // Temporary functionality to convert JSON strings to objects
+    try {
+        newWork.frontTech = JSON.parse(newWork.frontTech);
+        newWork.backTech = JSON.parse(newWork.backTech);
+    } catch (err) {
+        return res
+            .status(400)
+            .json({ error: "Invalid JSON format for tech fields" });
+    }
 
     // Ensure frontTech and backTech are arrays
     newWork.frontTech = Array.isArray(newWork.frontTech)
@@ -141,11 +164,25 @@ async function httpUpdatedWork(req, res) {
         console.log("Old Work ID:", oldWork._id);
         console.log(
             "Old Work Data from Database:",
-            JSON.parse(JSON.stringify(oldWork))
+            JSON.parse(
+                JSON.stringify(oldWork, (key, value) => {
+                    if (Array.isArray(value)) {
+                        return JSON.stringify(value);
+                    }
+                    return value;
+                })
+            )
         ); // Convert to regular object
         console.log(
             "New Work Data from Front-end:",
-            JSON.parse(JSON.stringify(newWork))
+            JSON.parse(
+                JSON.stringify(newWork, (key, value) => {
+                    if (Array.isArray(value)) {
+                        return JSON.stringify(value);
+                    }
+                    return value;
+                })
+            )
         );
         console.log(
             "Uploaded Image:",
