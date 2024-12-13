@@ -21,12 +21,12 @@ const workSchema = new mongoose.Schema(
         name: { type: String, required: true },
         dateFinished: { type: Date, required: true },
         category: { type: String, required: true },
-        client: { type: String },
-        link: { type: String },
-        frontTech: { type: Map, of: [techSchema], required: false },
-        backTech: { type: Map, of: [techSchema], required: false },
+        client: { type: String, default: undefined },
+        link: { type: String, default: undefined },
+        frontTech: { type: Map, of: [techSchema], default: undefined },
+        backTech: { type: Map, of: [techSchema], default: undefined },
         cardImage: imageSchema,
-        images: [imageSchema],
+        images: { type: [imageSchema], default: undefined },
     },
     { timestamps: true }
 );

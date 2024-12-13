@@ -13,18 +13,19 @@ async function createWork(work) {
 
 async function updateWork(work) {
     try {
-        const result = await WorkSchema.updateOne(
-            { _id: work._id },
-            { $set: work }
+        const result = await WorkSchema.findByIdAndUpdate(
+            work._id,
+            { $set: work },
+            { new: true, useFindAndModify: false }
         );
-        if (result.nModified === 0) {
+        if (!result) {
             console.log(`Work not found with ID ${work._id}`);
             return null;
         }
         console.log("Work updated in database");
         return result;
     } catch (err) {
-        console.log(`Error updating Work with ID ${work._id}`);
+        console.log(`Error updating Work with ID ${work._id}: ${err}`);
     }
 }
 

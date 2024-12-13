@@ -53,6 +53,7 @@ async function httpGetImagesWork(req, res) {
         }
     });
 }
+
 async function httpGetCategoriesWorks(req, res) {
     try {
         const allCategories = await getAllWorkCategories();
@@ -89,20 +90,6 @@ async function httpCreateWork(req, res) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Temporary functionality to convert JSON strings to objects
-    try {
-        work.frontTech = JSON.parse(work.frontTech);
-        work.backTech = JSON.parse(work.backTech);
-    } catch (err) {
-        return res
-            .status(400)
-            .json({ error: "Invalid JSON format for tech fields" });
-    }
-
-    // Ensure frontTech and backTech are arrays
-    work.frontTech = Array.isArray(work.frontTech) ? work.frontTech : [];
-    work.backTech = Array.isArray(work.backTech) ? work.backTech : [];
-
     try {
         console.log("=== Creating Work ===");
         const destination = generateImageDestination("works", work.name, image);
@@ -131,7 +118,6 @@ async function httpCreateWork(req, res) {
         });
     }
 }
-
 async function httpUpdatedWork(req, res) {
     let newWork = parseDeep(req.body);
     const image = req.file;
@@ -162,28 +148,8 @@ async function httpUpdatedWork(req, res) {
         }
 
         console.log("Old Work ID:", oldWork._id);
-        console.log(
-            "Old Work Data from Database:",
-            JSON.parse(
-                JSON.stringify(oldWork, (key, value) => {
-                    if (Array.isArray(value)) {
-                        return JSON.stringify(value);
-                    }
-                    return value;
-                })
-            )
-        ); // Convert to regular object
-        console.log(
-            "New Work Data from Front-end:",
-            JSON.parse(
-                JSON.stringify(newWork, (key, value) => {
-                    if (Array.isArray(value)) {
-                        return JSON.stringify(value);
-                    }
-                    return value;
-                })
-            )
-        );
+        console.log("Old Work Data from Database:", oldWork);
+        console.log("New Work Data from Front-end:", newWork);
         console.log(
             "Uploaded Image:",
             image ? image.originalname : "No new image uploaded"
@@ -210,36 +176,32 @@ async function httpUpdatedWork(req, res) {
             const newCardImage = await getCardImage(newWork.name, image);
             console.log("New card image data obtained.");
 
-            newWork = {
-                ...newWork,
-                cardImage: {
-                    name: newCardImage.name,
-                    blurHash: newCardImage.blurHash,
-                    destination: destination,
-                    url: newImageUrl,
-                    size: image.size,
-                },
+            newWork.cardImage = {
+                name: newCardImage.name,
+                blurHash: newCardImage.blurHash,
+                destination: destination,
+                url: newImageUrl,
+                size: image.size,
             };
 
             console.log("Updated work data prepared.");
-            await updateWork(newWork);
         } else {
             console.log("Image has not changed, skipping image update.");
-            await updateWork({
-                ...oldWork,
-                ...newWork,
-            });
-            console.log("Work updated in database without image change.");
         }
+
+        const updatedWork = await updateWork(newWork);
+        if (!updatedWork) {
+            return res.status(404).json({ error: "Work not found" });
+        }
+
+        console.log("=== Work Update Complete ===");
+        return res.status(200).json(updatedWork);
     } catch (err) {
         console.error("Error updating work:", err.message);
         return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
     }
-
-    console.log("=== Work Update Complete ===");
-    return res.status(200).json(newWork);
 }
 
 async function httpDeleteWork(req, res) {
