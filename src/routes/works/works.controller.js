@@ -92,11 +92,18 @@ async function httpCreateWork(req, res) {
 
     try {
         console.log("=== Creating Work ===");
+
+        // Create work in the database first
+        const result = await createWork(work);
+        console.log("Create work success:", result);
+
+        // If work creation is successful, proceed with image upload
         const destination = generateImageDestination("works", work.name, image);
         const cardImage = await getCardImage(work.name, image);
         await uploadImageToFirebase(image, destination);
         const imageUrl = await getDownloadURLFromFirebase(destination);
 
+        // Update work with cardImage details
         work.cardImage = {
             name: cardImage.name,
             blurHash: cardImage.blurHash,
@@ -105,13 +112,24 @@ async function httpCreateWork(req, res) {
             size: image.size,
         };
 
-        const result = await createWork(work);
-        console.log("Create work success:", result);
+        // Update the work in the database with the cardImage details
+        const updatedResult = await updateWork({ work, _id: result._id });
+        console.log("Update work with cardImage success:", updatedResult);
 
         console.log("=== Work Creation Complete ===");
-        return res.status(201).json(result);
+        return res.status(201).json(updatedResult);
     } catch (err) {
         console.error("Error creating work:", err.message);
+
+        // If image upload fails, delete the created work from the database
+        if (result && result._id) {
+            await deleteWork(result._id);
+            console.log(
+                "Deleted work due to image upload failure:",
+                result._id
+            );
+        }
+
         res.status(500).json({
             message: `Invalid input: ${err.message}`,
             details: err.errors,
@@ -218,8 +236,14 @@ async function httpDeleteWork(req, res) {
         }
 
         const { cardImage } = work;
-        console.log("Deleting image from Firebase:", cardImage.destination);
-        await deleteImageFromFirebase(cardImage.destination);
+        if (cardImage && cardImage.destination) {
+            console.log("Deleting image from Firebase:", cardImage.destination);
+            await deleteImageFromFirebase(cardImage.destination);
+        } else {
+            console.log(
+                "No cardImage or destination found, skipping image deletion."
+            );
+        }
         await deleteWork(_id);
         console.info(`The work was successfully deleted: ${_id}`);
     } catch (err) {
