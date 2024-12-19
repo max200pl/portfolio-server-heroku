@@ -129,7 +129,7 @@ async function httpUpdatedWork(req, res) {
 
     try {
         console.log("=== Updating Work ===");
-        const oldWork = await getWorkById(newWork._id);
+        let oldWork = await getWorkById(newWork._id);
         if (!oldWork) {
             console.info("Work not found:", newWork._id);
             console.info("=== Work Update Complete ===");
@@ -162,7 +162,6 @@ async function httpUpdatedWork(req, res) {
             "backTech"
         );
 
-        // Remove empty fields
         oldWork = removeEmptyFields(oldWork);
 
         if (image) {
