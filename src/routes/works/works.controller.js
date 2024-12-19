@@ -1,7 +1,4 @@
-const {
-    generateImageDestination,
-    parseDeep,
-} = require("../../helpers/helpers");
+const { parseDeep } = require("../../helpers/helpers");
 const {
     getTechnologies,
     createWork,
@@ -12,11 +9,11 @@ const {
     getAllWorkCategories,
 } = require("../../models/works.model");
 const {
-    uploadImageToFirebase,
-    deleteImageFromFirebase,
-    getDownloadURLFromFirebase,
-} = require("../../utils/firebaseStorage");
-const { getCardImage } = require("../../utils/images");
+    handleImageUpload,
+    handleImageDeletion,
+    techUpdates,
+    removeEmptyFields,
+} = require("./works.controller.helpers");
 const path = require("path");
 
 async function httpGetFilteredAndSortedWorks(req, res) {
@@ -83,7 +80,7 @@ async function httpGetTechnologies(req, res) {
 }
 
 async function httpCreateWork(req, res) {
-    const work = req.body;
+    const work = parseDeep(req.body);
     const image = req.file;
 
     if (!work || !image) {
@@ -98,22 +95,11 @@ async function httpCreateWork(req, res) {
         console.log("Create work success:", result);
 
         // If work creation is successful, proceed with image upload
-        const destination = generateImageDestination("works", work.name, image);
-        const cardImage = await getCardImage(work.name, image);
-        await uploadImageToFirebase(image, destination);
-        const imageUrl = await getDownloadURLFromFirebase(destination);
-
-        // Update work with cardImage details
-        work.cardImage = {
-            name: cardImage.name,
-            blurHash: cardImage.blurHash,
-            destination: destination,
-            url: imageUrl,
-            size: image.size,
-        };
+        const cardImage = await handleImageUpload(work, image);
+        work.cardImage = cardImage;
 
         // Update the work in the database with the cardImage details
-        const updatedResult = await updateWork({ work, _id: result._id });
+        const updatedResult = await updateWork({ ...work, _id: result._id });
         console.log("Update work with cardImage success:", updatedResult);
 
         console.log("=== Work Creation Complete ===");
@@ -136,25 +122,10 @@ async function httpCreateWork(req, res) {
         });
     }
 }
+
 async function httpUpdatedWork(req, res) {
     let newWork = parseDeep(req.body);
     const image = req.file;
-
-    // Temporary functionality to convert JSON strings to objects
-    try {
-        newWork.frontTech = JSON.parse(newWork.frontTech);
-        newWork.backTech = JSON.parse(newWork.backTech);
-    } catch (err) {
-        return res
-            .status(400)
-            .json({ error: "Invalid JSON format for tech fields" });
-    }
-
-    // Ensure frontTech and backTech are arrays
-    newWork.frontTech = Array.isArray(newWork.frontTech)
-        ? newWork.frontTech
-        : [];
-    newWork.backTech = Array.isArray(newWork.backTech) ? newWork.backTech : [];
 
     try {
         console.log("=== Updating Work ===");
@@ -166,48 +137,44 @@ async function httpUpdatedWork(req, res) {
         }
 
         console.log("Old Work ID:", oldWork._id);
-        console.log("Old Work Data from Database:", oldWork);
-        console.log("New Work Data from Front-end:", newWork);
+        console.log(
+            "Old Work Data from Database:",
+            JSON.stringify(oldWork, null, 2)
+        );
+        console.log(
+            "New Work Data from Front-end:",
+            JSON.stringify(newWork, null, 2)
+        );
         console.log(
             "Uploaded Image:",
             image ? image.originalname : "No new image uploaded"
         );
 
+        // Update frontTech and backTech fields
+        oldWork.frontTech = techUpdates(
+            oldWork.frontTech,
+            newWork.frontTech,
+            "frontTech"
+        );
+        oldWork.backTech = techUpdates(
+            oldWork.backTech,
+            newWork.backTech,
+            "backTech"
+        );
+
+        // Remove empty fields
+        oldWork = removeEmptyFields(oldWork);
+
         if (image) {
             console.log("Image has changed, updating image.");
-            const oldDestination = oldWork.cardImage.destination;
-            const destination = generateImageDestination(
-                "works",
-                newWork.name,
-                image
-            );
-
-            await deleteImageFromFirebase(oldDestination);
-            console.log("Deleted old image from Firebase.");
-
-            await uploadImageToFirebase(image, destination);
-            console.log("Uploaded new image to Firebase.");
-
-            const newImageUrl = await getDownloadURLFromFirebase(destination);
-            console.log("New image URL from Firebase obtained.");
-
-            const newCardImage = await getCardImage(newWork.name, image);
-            console.log("New card image data obtained.");
-
-            newWork.cardImage = {
-                name: newCardImage.name,
-                blurHash: newCardImage.blurHash,
-                destination: destination,
-                url: newImageUrl,
-                size: image.size,
-            };
-
+            await handleImageDeletion(oldWork.cardImage);
+            oldWork.cardImage = await handleImageUpload(newWork, image);
             console.log("Updated work data prepared.");
         } else {
             console.log("Image has not changed, skipping image update.");
         }
 
-        const updatedWork = await updateWork(newWork);
+        const updatedWork = await updateWork(oldWork);
         if (!updatedWork) {
             return res.status(404).json({ error: "Work not found" });
         }
@@ -235,15 +202,7 @@ async function httpDeleteWork(req, res) {
             return res.status(404).json({ error: "Work not found" });
         }
 
-        const { cardImage } = work;
-        if (cardImage && cardImage.destination) {
-            console.log("Deleting image from Firebase:", cardImage.destination);
-            await deleteImageFromFirebase(cardImage.destination);
-        } else {
-            console.log(
-                "No cardImage or destination found, skipping image deletion."
-            );
-        }
+        await handleImageDeletion(work.cardImage);
         await deleteWork(_id);
         console.info(`The work was successfully deleted: ${_id}`);
     } catch (err) {
@@ -257,6 +216,7 @@ async function httpDeleteWork(req, res) {
     console.info("=== Work Deletion Complete ===");
     return res.status(200).json({ message: "Work deleted successfully", _id });
 }
+
 console.info("=== End of Work Controller ===");
 
 module.exports = {
