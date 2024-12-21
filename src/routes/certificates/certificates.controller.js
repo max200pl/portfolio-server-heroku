@@ -49,53 +49,82 @@ async function httpCreateCertificate(req, res) {
 
     console.log("=== Creating Certificate ===");
     console.log("Current certificate for create:", req.body);
-    console.log("Current image for create:", req.file);
+    console.log(
+        "Current image for create:",
+        file ? file.originalname : "No image uploaded"
+    );
 
-    if (!name || !category || !file) {
+    if (!name || !category) {
+        console.info("Missing required fields");
+        console.info("=== Certificate Creation Complete ===");
         return res.status(400).json({ message: "Missing required fields" });
     }
 
     try {
-        const destination = generateImageDestination(
-            "certificates",
-            name,
-            file
-        );
-        console.log("Current image destination for create:", destination);
-
-        const cardImage = await handleImageUpload({ name }, file);
-        delete cardImage.name; // Remove the name field
-
-        const imageUrl = cardImage.url;
-
-        const certificateData = {
+        let certificateData = {
             name,
             dateFinished,
             category,
             link,
-            cardImage: {
-                blurHash: cardImage.blurHash,
-                destination: destination,
-                url: imageUrl,
-                size: file.size,
-            },
         };
 
-        console.log("Current certificate data for create:", certificateData);
-
+        // Create certificate in the database first
         const result = await createCertificate(certificateData);
-        console.log("The certificate was successfully created:", result);
+        console.log("Create certificate success:", result);
 
-        res.status(201).json(result);
+        // If certificate creation is successful, proceed with image upload
+        if (file) {
+            const destination = generateImageDestination(
+                "certificates",
+                name,
+                file
+            );
+            console.log("Current image destination for create:", destination);
+
+            const cardImage = await handleImageUpload({ name }, file);
+            delete cardImage.name; // Remove the name field
+
+            certificateData.cardImage = {
+                blurHash: cardImage.blurHash,
+                destination: cardImage.destination,
+                url: cardImage.url,
+                size: file.size,
+            };
+
+            // Update the certificate in the database with the cardImage details
+            const updatedResult = await updateCertificate({
+                ...certificateData,
+                _id: result._id,
+            });
+            console.log(
+                "Update certificate with cardImage success:",
+                updatedResult
+            );
+
+            console.info("=== Certificate Creation Complete ===");
+            return res.status(201).json(updatedResult);
+        }
+
+        console.info("=== Certificate Creation Complete ===");
+        return res.status(201).json(result);
     } catch (err) {
         console.error("Error creating certificate:", err.message);
-        res.status(500).json({
+
+        // If image upload fails, delete the created certificate from the database
+        if (result && result._id) {
+            await deleteCertificate(result._id);
+            console.log(
+                "Deleted certificate due to image upload failure:",
+                result._id
+            );
+        }
+
+        console.info("=== Certificate Creation Complete ===");
+        return res.status(500).json({
             message: `Invalid input: ${err.message}`,
             details: err.errors,
         });
     }
-
-    console.log("=== Certificate Creation Complete ===");
 }
 
 async function httpUpdateCertificate(req, res) {

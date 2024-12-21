@@ -14,8 +14,12 @@ const certificateSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         dateFinished: { type: Date },
-        category: { type: String, required: true },
-        cardImage: imageSchema,
+        category: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "Category",
+        },
+        cardImage: { type: imageSchema, required: false },
         link: { type: String },
     },
     { timestamps: true }
