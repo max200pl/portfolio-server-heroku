@@ -13,18 +13,21 @@ const {
 } = require("../../utils/images");
 
 async function httpGetAllCertificates(req, res) {
-    let certificates = undefined;
     const { category } = req.query;
-    console.log(category, "category");
+    console.info("=== Fetching Certificates ===");
+    console.info("Category filter:", category);
 
     try {
-        certificates = await getFilteredAndSortedCertificates(category);
-        console.log(`Returned ${certificates.length} certificates`);
-        res.status(200).json(certificates);
-    } catch (error) {
-        res.status(500).json({
-            error: `Something went wrong ${error}`,
+        const certificates = await getFilteredAndSortedCertificates(category);
+        console.info(`Returned ${certificates.length} certificates`);
+        return res.status(200).json(certificates);
+    } catch (err) {
+        console.error("Error fetching certificates:", err.message);
+        return res.status(500).json({
+            error: `Something went wrong: ${err.message}`,
         });
+    } finally {
+        console.info("=== Certificate Fetching Complete ===");
     }
 }
 
@@ -184,18 +187,15 @@ async function httpDeleteCertificate(req, res) {
             return res.status(404).json({ error: "Certificate not found" });
         }
 
-        const { cardImage } = certificate;
-
-        await handleImageDeletion(cardImage.destination);
-
+        await handleImageDeletion(certificate.cardImage);
         await deleteCertificate(_id);
         console.info(`The certificate was successfully deleted: ${_id}`);
     } catch (err) {
         console.error("Error deleting certificate:", err.message);
         console.info("=== Certificate Deletion Complete ===");
-        return res.status(500).json({
-            error: `Something went wrong: ${err.message}`,
-        });
+        return res
+            .status(500)
+            .json({ error: `Something went wrong: ${err.message}` });
     }
 
     console.info("=== Certificate Deletion Complete ===");
