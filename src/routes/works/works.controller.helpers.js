@@ -7,17 +7,16 @@ const {
     deleteImageFromFirebase,
     getDownloadURLFromFirebase,
 } = require("../../utils/firebaseStorage");
-const { getCardImage } = require("../../utils/images");
+const { generateBlurHash } = require("../../utils/images");
 
 async function handleImageUpload(work, image) {
     const destination = generateImageDestination("works", work.name, image);
-    const cardImage = await getCardImage(work.name, image);
+    const blurHash = await generateBlurHash(image.buffer);
     await uploadImageToFirebase(image, destination);
     const imageUrl = await getDownloadURLFromFirebase(destination);
 
     return {
-        name: cardImage.name,
-        blurHash: cardImage.blurHash,
+        blurHash: blurHash,
         destination: destination,
         url: imageUrl,
         size: image.size,

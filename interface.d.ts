@@ -4,7 +4,6 @@ interface Tech {
 }
 
 interface Image {
-    name: string;
     blurHash: string;
     url: string;
     destination: string;
