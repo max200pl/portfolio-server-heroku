@@ -4,15 +4,11 @@ const technologiesSchema = require("../db/technologies.mongo");
 
 async function createCertificate(certificateData) {
     try {
-        const certificate = new CertificateSchema(certificateData);
-        const result = await certificate.save();
+        const result = await CertificateSchema.create(certificateData);
         console.log("Certificate created in database");
-        return { id: result.id, ...result._doc };
+        return result;
     } catch (err) {
         console.error(`Could not save Certificate: ${err.message}`);
-        if (err.errors) {
-            console.error("Validation errors:", err.errors);
-        }
     }
 }
 
