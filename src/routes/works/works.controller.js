@@ -11,6 +11,8 @@ const {
 const {
     handleImageUpload,
     handleImageDeletion,
+} = require("../../utils/images");
+const {
     techUpdates,
     removeEmptyFields,
 } = require("./works.controller.helpers");
@@ -96,6 +98,7 @@ async function httpCreateWork(req, res) {
 
         // If work creation is successful, proceed with image upload
         const cardImage = await handleImageUpload(work, image);
+        delete cardImage.name; // Remove the name field
         work.cardImage = cardImage;
 
         // Update the work in the database with the cardImage details
@@ -168,6 +171,7 @@ async function httpUpdatedWork(req, res) {
             console.log("Image has changed, updating image.");
             await handleImageDeletion(oldWork.cardImage);
             oldWork.cardImage = await handleImageUpload(newWork, image);
+            delete oldWork.cardImage.name; // Remove the name field
             console.log("Updated work data prepared.");
         } else {
             console.log("Image has not changed, skipping image update.");

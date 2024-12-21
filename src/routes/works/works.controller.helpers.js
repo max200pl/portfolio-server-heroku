@@ -9,31 +9,6 @@ const {
 } = require("../../utils/firebaseStorage");
 const { generateBlurHash } = require("../../utils/images");
 
-async function handleImageUpload(work, image) {
-    const destination = generateImageDestination("works", work.name, image);
-    const blurHash = await generateBlurHash(image.buffer);
-    await uploadImageToFirebase(image, destination);
-    const imageUrl = await getDownloadURLFromFirebase(destination);
-
-    return {
-        blurHash: blurHash,
-        destination: destination,
-        url: imageUrl,
-        size: image.size,
-    };
-}
-
-async function handleImageDeletion(cardImage) {
-    if (cardImage && cardImage.destination) {
-        console.log("Deleting image from Firebase:", cardImage.destination);
-        await deleteImageFromFirebase(cardImage.destination);
-    } else {
-        console.log(
-            "No cardImage or destination found, skipping image deletion."
-        );
-    }
-}
-
 function removeEmptyFields(obj) {
     for (const key in obj) {
         if (
@@ -79,8 +54,6 @@ function techUpdates(oldTech, newTech, techType) {
 }
 
 module.exports = {
-    handleImageUpload,
-    handleImageDeletion,
     techUpdates,
     removeEmptyFields,
 };

@@ -8,12 +8,9 @@ const {
     getAllCertificateCategories,
 } = require("../../models/certificates.model");
 const {
-    uploadImageToFirebase,
-    deleteImageFromFirebase,
-    getDownloadURLFromFirebase,
-} = require("../../utils/firebaseStorage");
-const { getCardImage } = require("../../utils/images");
-const path = require("path");
+    handleImageUpload,
+    handleImageDeletion,
+} = require("../../utils/images");
 
 async function httpGetAllCertificates(req, res) {
     let certificates = undefined;
@@ -63,10 +60,10 @@ async function httpCreateCertificate(req, res) {
         );
         console.log("Current image destination for create:", destination);
 
-        const cardImage = await getCardImage(name, file);
+        const cardImage = await handleImageUpload({ name }, file);
+        delete cardImage.name; // Remove the name field
 
-        await uploadImageToFirebase(file, destination);
-        const imageUrl = await getDownloadURLFromFirebase(destination);
+        const imageUrl = cardImage.url;
 
         const certificateData = {
             name,
@@ -74,7 +71,6 @@ async function httpCreateCertificate(req, res) {
             category,
             link,
             cardImage: {
-                name: cardImage.name,
                 blurHash: cardImage.blurHash,
                 destination: destination,
                 url: imageUrl,
@@ -136,25 +132,18 @@ async function httpUpdateCertificate(req, res) {
                 image
             );
 
-            await deleteImageFromFirebase(oldDestination);
+            await handleImageDeletion(oldDestination);
             console.log("Deleted old image from Firebase.");
 
-            await uploadImageToFirebase(image, destination);
-            console.log("Uploaded new image to Firebase.");
-
-            const newImageUrl = await getDownloadURLFromFirebase(destination);
-            console.log("New image URL from Firebase obtained.");
-
-            const newCardImage = await getCardImage(newCertificate.name, image);
-            console.log("New card image data obtained.");
+            const newCardImage = await handleImageUpload(newCertificate, image);
+            delete newCardImage.name; // Remove the name field
 
             newCertificate = {
                 ...newCertificate,
                 cardImage: {
-                    name: newCardImage.name,
                     blurHash: newCardImage.blurHash,
                     destination: destination,
-                    url: newImageUrl,
+                    url: newCardImage.url,
                     size: image.size,
                 },
             };
@@ -197,7 +186,7 @@ async function httpDeleteCertificate(req, res) {
 
         const { cardImage } = certificate;
 
-        await deleteImageFromFirebase(cardImage.destination);
+        await handleImageDeletion(cardImage.destination);
 
         await deleteCertificate(_id);
         console.info(`The certificate was successfully deleted: ${_id}`);

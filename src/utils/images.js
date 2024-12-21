@@ -3,7 +3,12 @@ const fs = require("fs").promises;
 const path = require("path");
 const { encode } = require("blurhash");
 const sharp = require("sharp");
-const { toCamelCase } = require("../helpers/helpers");
+const { generateImageDestination } = require("../helpers/helpers");
+const {
+    uploadImageToFirebase,
+    deleteImageFromFirebase,
+    getDownloadURLFromFirebase,
+} = require("../utils/firebaseStorage"); // Corrected path
 
 const IMAGES_DIR_PATH = path.join(__dirname, "..", "images");
 const IMAGES_JSON_DIR_PATH = path.join(__dirname, "..", "data", "images.json");
@@ -60,9 +65,42 @@ async function generateBlurHash(buffer) {
     }
 }
 
+async function handleImageUpload(certificate, file) {
+    const destination = generateImageDestination(
+        "certificates",
+        certificate.name,
+        file
+    );
+    await uploadImageToFirebase(file, destination);
+    const imageUrl = await getDownloadURLFromFirebase(destination);
+    const blurHash = await generateBlurHash(file.buffer);
+    return {
+        blurHash,
+        destination,
+        url: imageUrl,
+        size: file.size,
+    };
+}
+
+async function handleImageDeletion(cardImage) {
+    if (cardImage && cardImage.destination) {
+        console.log("Deleting image from Firebase:", cardImage.destination);
+        await deleteImageFromFirebase(cardImage.destination);
+    } else {
+        console.log(
+            "No cardImage or destination found, skipping image deletion."
+        );
+    }
+}
+
 module.exports = {
     generateBlurHash,
     getImageName,
     getFolderName,
     getLocalImages,
+    uploadImageToFirebase,
+    deleteImageFromFirebase,
+    getDownloadURLFromFirebase,
+    handleImageUpload,
+    handleImageDeletion,
 };
