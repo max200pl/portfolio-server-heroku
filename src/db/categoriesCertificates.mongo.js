@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const categoryCertificateSchema = new mongoose.Schema(
     {
-        type_name: { type: String, required: true },
+        label: { type: String, required: true },
         description: { type: String },
     },
     { timestamps: true }
