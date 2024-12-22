@@ -17,7 +17,7 @@ const certificateSchema = new mongoose.Schema(
         category: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "Category",
+            ref: "CategoryCertificate",
         },
         cardImage: { type: imageSchema, required: false },
         link: { type: String },
