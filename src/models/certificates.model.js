@@ -4,7 +4,10 @@ const technologiesSchema = require("../db/technologies.mongo");
 
 async function createCertificate(certificateData) {
     try {
-        const result = await CertificateSchema.create(certificateData);
+        const certificate = await CertificateSchema.create(certificateData);
+        const result = await CertificateSchema.findById(
+            certificate._id
+        ).populate("category");
         console.log("Certificate created in database");
         return result;
     } catch (err) {
@@ -17,7 +20,7 @@ async function updateCertificate(certificateData) {
         const result = await CertificateSchema.updateOne(
             { _id: certificateData._id },
             { $set: certificateData }
-        );
+        ).populate("category");
         if (result.nModified === 0) {
             console.log(`Certificate not found with ID ${certificateData.id}`);
             return null;
@@ -31,7 +34,9 @@ async function updateCertificate(certificateData) {
 
 async function deleteCertificate(_id) {
     try {
-        const result = await CertificateSchema.deleteOne({ _id });
+        const result = await CertificateSchema.deleteOne({ _id }).populate(
+            "category"
+        );
         console.log("Certificate deleted from database successfully.");
         return result;
     } catch (err) {
@@ -41,7 +46,9 @@ async function deleteCertificate(_id) {
 
 async function getCertificateById(_id) {
     try {
-        const certificate = await CertificateSchema.findById(_id);
+        const certificate = await CertificateSchema.findById(_id).populate(
+            "category"
+        );
         if (!certificate) {
             console.log(`Certificate not found with ID ${_id}`);
             return null;
@@ -55,10 +62,9 @@ async function getCertificateById(_id) {
 async function getFilteredAndSortedCertificates(category) {
     try {
         const query = category ? { category } : {};
-        const certificates = await CertificateSchema.find(query)
-            .sort({ dateFinished: -1 }) // Filtering by category and sorting by date
-            .populate("category"); // Populate the category field with the actual category data
-        return certificates;
+        return CertificateSchema.find(query)
+            .sort({ dateFinished: -1 })
+            .populate("category");
     } catch (err) {
         console.error(
             `Error fetching filtered and sorted certificates: ${err.message}`
