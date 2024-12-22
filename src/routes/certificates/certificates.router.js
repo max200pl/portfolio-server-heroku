@@ -6,6 +6,7 @@ const {
     httpGetCategoriesCertificates,
     httpDeleteCertificate,
     httpUpdateCertificate,
+    httpGetCertificateById,
 } = require("./certificates.controller");
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.post(
 
 router.get("/", httpGetAllCertificates);
 router.get("/categories", httpGetCategoriesCertificates);
+router.get("/:id", httpGetCertificateById);
 router.delete("/delete", httpDeleteCertificate);
 
 router.put(
