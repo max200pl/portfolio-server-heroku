@@ -157,15 +157,17 @@ async function httpUpdateCertificate(req, res) {
 
         if (image) {
             console.log("Image has changed, updating image.");
-            const oldDestination = oldCertificate.cardImage.destination;
+            const oldDestination = oldCertificate.cardImage?.destination;
+            if (oldDestination) {
+                await handleImageDeletion(oldDestination);
+                console.log("Deleted old image from Firebase.");
+            }
+
             const destination = generateImageDestination(
                 "certificates",
                 newCertificate.name,
                 image
             );
-
-            await handleImageDeletion(oldDestination);
-            console.log("Deleted old image from Firebase.");
 
             const newCardImage = await handleImageUpload(newCertificate, image);
             delete newCardImage.name; // Remove the name field
@@ -192,15 +194,18 @@ async function httpUpdateCertificate(req, res) {
                 "Certificate updated in database without image change."
             );
         }
+
+        const populatedCertificate = await getCertificateById(
+            newCertificate._id
+        ).populate("category");
+        console.log("=== Certificate Update Complete ===");
+        return res.status(200).json(populatedCertificate);
     } catch (err) {
         console.error("Error updating certificate:", err.message);
         return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
     }
-
-    console.log("=== Certificate Update Complete ===");
-    return res.status(200).json(newCertificate);
 }
 
 async function httpDeleteCertificate(req, res) {
@@ -233,6 +238,28 @@ async function httpDeleteCertificate(req, res) {
         .json({ message: "Certificate deleted successfully", _id });
 }
 
+async function httpGetCertificateById(req, res) {
+    const { id } = req.params;
+    console.info("=== Fetching Certificate by ID ===");
+    console.info("Certificate ID:", id);
+
+    try {
+        const certificate = await getCertificateById(id);
+        if (!certificate) {
+            console.info("Certificate not found:", id);
+            return res.status(404).json({ error: "Certificate not found" });
+        }
+        return res.status(200).json(certificate);
+    } catch (err) {
+        console.error("Error fetching certificate by ID:", err.message);
+        return res.status(500).json({
+            error: `Something went wrong: ${err.message}`,
+        });
+    } finally {
+        console.info("=== Certificate Fetching by ID Complete ===");
+    }
+}
+
 console.info("=== End of Certificate Controller ===");
 
 module.exports = {
@@ -241,4 +268,5 @@ module.exports = {
     httpCreateCertificate,
     httpUpdateCertificate,
     httpDeleteCertificate,
+    httpGetCertificateById, // Add this line
 };
