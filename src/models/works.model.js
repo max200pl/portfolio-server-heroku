@@ -1,11 +1,15 @@
 const WorkSchema = require("../db/works.mongo");
+const CategoryWork = require("../db/categoriesWorks.mongo");
 const technologiesSchema = require("../db/technologies.mongo");
 
 async function createWork(work) {
     try {
         const result = await WorkSchema.create(work);
+        const populatedResult = await WorkSchema.findById(result._id).populate(
+            "category"
+        );
         console.log("Work created in database");
-        return result;
+        return populatedResult;
     } catch (err) {
         console.log(`Could not save work ${err}`);
     }
@@ -17,7 +21,7 @@ async function updateWork(work) {
             work._id,
             { $set: work },
             { new: true, useFindAndModify: false }
-        );
+        ).populate("category");
         if (!result) {
             console.log(`Work not found with ID ${work._id}`);
             return null;
@@ -42,7 +46,9 @@ async function deleteWork(_id) {
 async function getFilteredAndSortedWorks(category) {
     try {
         const query = category ? { category } : {};
-        const works = await WorkSchema.find(query).sort({ dateFinished: -1 }); // Фильтрация по категории и сортировка по убыванию даты
+        const works = await WorkSchema.find(query)
+            .sort({ dateFinished: -1 }) // Filtering by category and sorting by date
+            .populate("category"); // Populate the category field with the actual category data
         return works;
     } catch (err) {
         console.error(
@@ -53,13 +59,23 @@ async function getFilteredAndSortedWorks(category) {
 
 async function getAllWorkCategories() {
     try {
-        const categories = await WorkSchema.find({}, { category: 1, _id: 0 });
+        const categories = await CategoryWork.find();
         if (!categories.length) {
             throw new Error("No categories found");
         }
         return categories;
     } catch (err) {
         console.error(`Error fetching categories: ${err.message}`);
+    }
+}
+
+async function createWorkCategory(categoryData) {
+    try {
+        const result = await CategoryWork.create(categoryData);
+        console.log("Work category created in database");
+        return result;
+    } catch (err) {
+        console.error(`Could not save work category: ${err.message}`);
     }
 }
 
@@ -75,7 +91,7 @@ async function getTechnologies() {
 
 async function getWorkById(_id) {
     try {
-        const work = await WorkSchema.findById(_id);
+        const work = await WorkSchema.findById(_id).populate("category");
         if (!work) {
             console.log(`Work not found with ID ${_id}`);
             return null;
@@ -94,4 +110,5 @@ module.exports = {
     getAllWorkCategories,
     getTechnologies,
     getWorkById,
+    createWorkCategory,
 };
