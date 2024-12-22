@@ -197,7 +197,7 @@ async function httpUpdateCertificate(req, res) {
 
         const populatedCertificate = await getCertificateById(
             newCertificate._id
-        ).populate("category");
+        );
         console.log("=== Certificate Update Complete ===");
         return res.status(200).json(populatedCertificate);
     } catch (err) {
