@@ -62,9 +62,10 @@ async function getCertificateById(_id) {
 async function getFilteredAndSortedCertificates(category) {
     try {
         const query = category ? { category } : {};
-        return CertificateSchema.find(query)
-            .sort({ dateFinished: -1 })
-            .populate("category");
+        const certificates = await CertificateSchema.find(query)
+            .sort({ dateFinished: -1 }) // Filtering by category and sorting by date
+            .populate("category"); // Populate the category field with the actual category data
+        return certificates;
     } catch (err) {
         console.error(
             `Error fetching filtered and sorted certificates: ${err.message}`
