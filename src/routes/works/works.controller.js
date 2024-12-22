@@ -177,6 +177,11 @@ async function httpUpdatedWork(req, res) {
             console.log("Image has not changed, skipping image update.");
         }
 
+        // Dynamically update fields
+        Object.keys(newWork).forEach((key) => {
+            oldWork[key] = newWork[key];
+        });
+
         const updatedWork = await updateWork(oldWork);
         if (!updatedWork) {
             return res.status(404).json({ error: "Work not found" });
