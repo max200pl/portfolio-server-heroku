@@ -1,14 +1,3 @@
-const {
-    generateImageDestination,
-    parseDeep,
-} = require("../../helpers/helpers");
-const {
-    uploadImageToFirebase,
-    deleteImageFromFirebase,
-    getDownloadURLFromFirebase,
-} = require("../../utils/firebaseStorage");
-const { generateBlurHash } = require("../../utils/images");
-
 function removeEmptyFields(obj) {
     for (const key in obj) {
         if (

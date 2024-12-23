@@ -65,12 +65,8 @@ async function generateBlurHash(buffer) {
     }
 }
 
-async function handleImageUpload(certificate, file) {
-    const destination = generateImageDestination(
-        "certificates",
-        certificate.name,
-        file
-    );
+async function handleImageUpload(image, file, type) {
+    const destination = generateImageDestination(type, image.name, file);
     await uploadImageToFirebase(file, destination);
     const imageUrl = await getDownloadURLFromFirebase(destination);
     const blurHash = await generateBlurHash(file.buffer);

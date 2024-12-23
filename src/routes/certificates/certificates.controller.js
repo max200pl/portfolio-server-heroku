@@ -81,7 +81,12 @@ async function httpCreateCertificate(req, res) {
             );
             console.log("Current image destination for create:", destination);
 
-            const cardImage = await handleImageUpload({ name }, file);
+            const cardImage = await handleImageUpload(
+                { name },
+                file,
+                "certificates"
+            );
+
             delete cardImage.name; // Remove the name field
 
             certificateData.cardImage = {
