@@ -97,8 +97,12 @@ async function httpCreateWork(req, res) {
         console.log("Create work success:", result);
 
         // If work creation is successful, proceed with image upload
-        const cardImage = await handleImageUpload(work, image, "works");
-        delete cardImage.name; // Remove the name field
+        const cardImage = await handleImageUpload({
+            image: { name: work.name },
+            file: image,
+            type: "works",
+        });
+
         work.cardImage = cardImage;
 
         // Update the work in the database with the cardImage details
