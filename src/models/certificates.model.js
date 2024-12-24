@@ -17,18 +17,21 @@ async function createCertificate(certificateData) {
 
 async function updateCertificate(certificateData) {
     try {
-        const result = await CertificateSchema.updateOne(
-            { _id: certificateData._id },
-            { $set: certificateData }
+        const result = await CertificateSchema.findByIdAndUpdate(
+            certificateData._id,
+            { $set: certificateData },
+            { new: true, useFindAndModify: false }
         ).populate("category");
-        if (result.nModified === 0) {
-            console.log(`Certificate not found with ID ${certificateData.id}`);
+        if (!result) {
+            console.log(`Certificate not found with ID ${certificateData._id}`);
             return null;
         }
         console.log("Certificate updated in database");
-        return { id: certificateData.id, ...certificateData };
+        return result;
     } catch (err) {
-        console.log(`Error updating Certificate with ID ${certificateData.id}`);
+        console.log(
+            `Error updating Certificate with ID ${certificateData._id}`
+        );
     }
 }
 
