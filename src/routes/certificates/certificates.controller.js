@@ -60,6 +60,7 @@ async function httpCreateCertificate(req, res) {
         return res.status(400).json({ message: "Missing required fields" });
     }
 
+    let result;
     try {
         let certificateData = {
             name,
@@ -69,25 +70,16 @@ async function httpCreateCertificate(req, res) {
         };
 
         // Create certificate in the database first
-        const result = await createCertificate(certificateData);
+        result = await createCertificate(certificateData);
         console.log("Create certificate success:", result);
 
         // If certificate creation is successful, proceed with image upload
         if (file) {
-            const destination = generateImageDestination(
-                "certificates",
-                name,
-                file
-            );
-            console.log("Current image destination for create:", destination);
-
-            const cardImage = await handleImageUpload(
-                { name },
+            const cardImage = await handleImageUpload({
+                image: { name: name },
                 file,
-                "certificates"
-            );
-
-            delete cardImage.name; // Remove the name field
+                type: "certificates",
+            });
 
             certificateData.cardImage = {
                 blurHash: cardImage.blurHash,
@@ -175,7 +167,6 @@ async function httpUpdateCertificate(req, res) {
             );
 
             const newCardImage = await handleImageUpload(newCertificate, image);
-            delete newCardImage.name; // Remove the name field
 
             newCertificate = {
                 ...newCertificate,
