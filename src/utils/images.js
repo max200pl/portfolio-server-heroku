@@ -65,8 +65,21 @@ async function generateBlurHash(buffer) {
     }
 }
 
-async function handleImageUpload(image, file, type) {
-    const destination = generateImageDestination(type, image.name, file);
+/**
+ * Uploads an image to Firebase and returns the image URL
+ * @param {{
+ * image: { name: string },
+ * file: { buffer: Buffer, originalname: string },
+ * type: string
+ * }} param
+ */
+async function handleImageUpload({ image, file, type }) {
+    const destination = generateImageDestination({
+        type,
+        name: image.name,
+        file,
+    });
+
     await uploadImageToFirebase(file, destination);
     const imageUrl = await getDownloadURLFromFirebase(destination);
     const blurHash = await generateBlurHash(file.buffer);
