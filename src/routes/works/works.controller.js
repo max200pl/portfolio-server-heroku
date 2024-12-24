@@ -175,7 +175,7 @@ async function httpUpdatedWork(req, res) {
             console.log("Image has changed, updating image.");
             await handleImageDeletion(oldWork.cardImage);
             oldWork.cardImage = await handleImageUpload({
-                image: { name: newWork.name },
+                image: { name: newWork?.name ?? oldWork.name },
                 file: image,
                 type: "works",
             });
