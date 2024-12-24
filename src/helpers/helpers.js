@@ -50,7 +50,18 @@ function parseDeep(data) {
     return parsedObject;
 }
 
-function generateImageDestination(type, name, file) {
+/**
+ * Generate a unique image destination path
+ * @param {{
+ *  type: "works" | "certificates",
+ *  name: string,
+ *  file: {
+ *    originalname: string
+ *  }
+ * }} destination - The type of image
+ * @returns {string} - The image destination path
+ */
+function generateImageDestination({ type, name, file }) {
     const uniqueId = uuidv4({
         rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
     });
