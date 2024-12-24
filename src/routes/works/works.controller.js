@@ -179,8 +179,7 @@ async function httpUpdatedWork(req, res) {
                 file: image,
                 type: "works",
             });
-            delete oldWork.cardImage.name; // Remove the name field
-            console.log("Updated work data prepared.");
+            console.log("New cardImage:", oldWork.cardImage);
         } else {
             console.log("Image has not changed, skipping image update.");
         }
