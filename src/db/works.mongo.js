@@ -5,7 +5,7 @@ const techSchema = new mongoose.Schema({
     apply: { type: Number, required: true },
 });
 
-const imageSchema = new mongoose.Schema(
+const cardImageSchema = new mongoose.Schema(
     {
         blurHash: { type: String, required: true },
         url: { type: String, required: true },
@@ -13,6 +13,16 @@ const imageSchema = new mongoose.Schema(
         size: { type: Number, required: true },
     },
     { _id: false }
+);
+
+const slideSchema = new mongoose.Schema(
+    {
+        blurHash: { type: String, required: true },
+        url: { type: String, required: true },
+        destination: { type: String, required: true },
+        size: { type: Number, required: true },
+    },
+    { _id: true }
 );
 
 const workSchema = new mongoose.Schema(
@@ -28,8 +38,8 @@ const workSchema = new mongoose.Schema(
         link: { type: String, default: undefined },
         frontTech: { type: Map, of: [techSchema], default: undefined },
         backTech: { type: Map, of: [techSchema], default: undefined },
-        cardImage: imageSchema,
-        images: { type: [imageSchema], default: undefined },
+        cardImage: cardImageSchema,
+        slides: { type: [slideSchema], default: undefined },
     },
     { timestamps: true }
 );
