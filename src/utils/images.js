@@ -3,17 +3,18 @@ const fs = require("fs").promises;
 const path = require("path");
 const { encode } = require("blurhash");
 const sharp = require("sharp");
-const { generateImageDestination } = require("../helpers/helpers");
+const { toCamelCase } = require("../helpers/helpers");
 const {
     uploadImageToFirebase,
     deleteImageFromFirebase,
     getDownloadURLFromFirebase,
 } = require("../utils/firebaseStorage"); // Corrected path
+const { v4: uuidv4 } = require("uuid");
+
+// ========  HELPERS ========== //
 
 const IMAGES_DIR_PATH = path.join(__dirname, "..", "images");
 const IMAGES_JSON_DIR_PATH = path.join(__dirname, "..", "data", "images.json");
-
-// ========  HELPERS ========== //
 
 const getImageName = (str) => {
     return str.slice(str.indexOf("/") + 1);
@@ -102,14 +103,32 @@ async function handleImageDeletion(cardImage) {
     }
 }
 
+/**
+ * Generate a unique image destination path
+ * @param {{
+ *  type: "works" | "certificates",
+ *  name: string,
+ *  file: {
+ *    originalname: string
+ *  }
+ * }} destination - The type of image
+ * @returns {string} - The image destination path
+ */
+function generateImageDestination({ type, name, file }) {
+    const uniqueId = uuidv4({
+        rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
+    });
+    const camelCaseName = toCamelCase(name);
+    const fileType = path.extname(file.originalname);
+    return `images/${type}/${camelCaseName}/${camelCaseName}_${uniqueId}${fileType}`;
+}
+
 module.exports = {
     generateBlurHash,
     getImageName,
     getFolderName,
     getLocalImages,
-    uploadImageToFirebase,
-    deleteImageFromFirebase,
-    getDownloadURLFromFirebase,
     handleImageUpload,
     handleImageDeletion,
+    generateImageDestination,
 };
