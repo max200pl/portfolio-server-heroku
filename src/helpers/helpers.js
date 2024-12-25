@@ -1,6 +1,3 @@
-const { v4: uuidv4 } = require("uuid");
-const path = require("path");
-
 function toCamelCase(str) {
     if (typeof str !== "string") {
         console.error(
@@ -50,28 +47,7 @@ function parseDeep(data) {
     return parsedObject;
 }
 
-/**
- * Generate a unique image destination path
- * @param {{
- *  type: "works" | "certificates",
- *  name: string,
- *  file: {
- *    originalname: string
- *  }
- * }} destination - The type of image
- * @returns {string} - The image destination path
- */
-function generateImageDestination({ type, name, file }) {
-    const uniqueId = uuidv4({
-        rng: uuidv4.nodeRNG, // Use node.js crypto module for random values
-    });
-    const camelCaseName = toCamelCase(name);
-    const fileType = path.extname(file.originalname);
-    return `images/${type}/${camelCaseName}_${uniqueId}${fileType}`;
-}
-
 module.exports = {
     parseDeep,
     toCamelCase,
-    generateImageDestination,
 };
