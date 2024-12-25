@@ -232,6 +232,53 @@ async function httpDeleteWork(req, res) {
     return res.status(200).json({ message: "Work deleted successfully", _id });
 }
 
+async function httpAddSlideWork(req, res) {
+    const { _id } = req.body;
+    const image = req.file;
+    console.info("=== Adding Slide to Work ===");
+    console.info("Current work for slide addition:", _id);
+
+    try {
+        const work = await getWorkById(_id);
+        if (!work) {
+            console.info("Work not found:", _id);
+            console.info("=== Slide Addition Complete ===");
+            return res.status(404).json({ error: "Work not found" });
+        }
+
+        // If work creation is successful, proceed with image upload
+        const slide = await handleImageUpload({
+            image: { name: work.name },
+            file: image,
+            type: "works",
+        });
+
+        work.slides.push(slide);
+
+        const updatedWork = await updateWork(work);
+        if (!updatedWork) {
+            return res.status(404).json({ error: "Work not found" });
+        }
+
+        console.info(
+            `The slide was successfully added to work:
+                name: ${work.name}
+                id: ${_id}
+                slide: ${JSON.stringify(slide)}
+            `
+        );
+
+        console.info("=== Slide Addition Complete ===");
+        return res.status(200).json(updatedWork);
+    } catch (err) {
+        console.error("Error adding slide to work:", err.message);
+        console.info("=== Slide Addition Complete ===");
+        return res
+            .status(500)
+            .json({ error: `Something went wrong: ${err.message}` });
+    }
+}
+
 console.info("=== End of Work Controller ===");
 
 module.exports = {
@@ -242,4 +289,5 @@ module.exports = {
     httpUpdatedWork,
     httpGetTechnologies,
     httpDeleteWork,
+    httpAddSlideWork,
 };
