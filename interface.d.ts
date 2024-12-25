@@ -10,6 +10,11 @@ interface Image {
     size: number;
 }
 
+interface Category {
+    label: string;
+    description?: string;
+}
+
 interface Work {
     name: string;
     dateFinished: Date;
@@ -25,3 +30,5 @@ interface Work {
     cardImage?: Image;
     images?: Image[];
 }
+
+interface Slide extends Image {}
