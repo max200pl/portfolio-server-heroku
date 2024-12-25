@@ -1,4 +1,3 @@
-const { generateImageDestination } = require("../../helpers/helpers");
 const {
     createCertificate,
     updateCertificate,
@@ -160,21 +159,19 @@ async function httpUpdateCertificate(req, res) {
                 console.log("Deleted old image from Firebase.");
             }
 
-            const destination = generateImageDestination(
-                "certificates",
-                newCertificate.name,
-                image
-            );
-
-            const newCardImage = await handleImageUpload(newCertificate, image);
+            const { blurHash, destination, url } = await handleImageUpload({
+                image: { name: newCertificate.name },
+                file: image,
+                type: "certificates",
+            });
 
             newCertificate = {
                 ...newCertificate,
                 cardImage: {
-                    blurHash: newCardImage.blurHash,
-                    destination: destination,
-                    url: newCardImage.url,
-                    size: image.size,
+                    blurHash,
+                    destination,
+                    url,
+                    size,
                 },
             };
 
