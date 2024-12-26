@@ -15,16 +15,6 @@ const cardImageSchema = new mongoose.Schema(
     { _id: false }
 );
 
-const slideSchema = new mongoose.Schema(
-    {
-        blurHash: { type: String, required: true },
-        url: { type: String, required: true },
-        destination: { type: String, required: true },
-        size: { type: Number, required: true },
-    },
-    { _id: true }
-);
-
 const workSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
@@ -39,9 +29,11 @@ const workSchema = new mongoose.Schema(
         frontTech: { type: Map, of: [techSchema], default: undefined },
         backTech: { type: Map, of: [techSchema], default: undefined },
         cardImage: cardImageSchema,
-        slides: { type: [slideSchema], default: undefined },
+        slides: [{ type: mongoose.Schema.Types.ObjectId, ref: "Slide" }], // Ссылки на слайды
     },
     { timestamps: true }
 );
 
-module.exports = mongoose.model("Works", workSchema);
+const Work = mongoose.model("Works", workSchema);
+
+module.exports = Work;
