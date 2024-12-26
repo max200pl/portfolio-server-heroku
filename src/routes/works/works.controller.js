@@ -16,7 +16,6 @@ const {
     techUpdates,
     removeEmptyFields,
 } = require("./works.controller.helpers");
-const path = require("path");
 
 async function httpGetFilteredAndSortedWorks(req, res) {
     const { category } = req.query;
@@ -28,29 +27,6 @@ async function httpGetFilteredAndSortedWorks(req, res) {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
-}
-
-async function httpGetImagesWork(req, res) {
-    const { project, name } = req.query;
-
-    console.log("Project:", project);
-
-    const options = {
-        root: path.join(__dirname, "../../images/" + project),
-        dotfiles: "deny",
-        headers: {
-            "x-timestamp": Date.now(),
-            "x-sent": true,
-        },
-    };
-
-    return res.sendFile(name, options, function (err) {
-        if (err) {
-            console.log(err.message);
-        } else {
-            console.log(`Sent: ${project}__${name}____`);
-        }
-    });
 }
 
 async function httpGetCategoriesWorks(req, res) {
@@ -232,62 +208,13 @@ async function httpDeleteWork(req, res) {
     return res.status(200).json({ message: "Work deleted successfully", _id });
 }
 
-async function httpAddSlideWork(req, res) {
-    const { _id } = req.body;
-    const image = req.file;
-    console.info("=== Adding Slide to Work ===");
-    console.info("Current work for slide addition:", _id);
-
-    try {
-        const work = await getWorkById(_id);
-        if (!work) {
-            console.info("Work not found:", _id);
-            console.info("=== Slide Addition Complete ===");
-            return res.status(404).json({ error: "Work not found" });
-        }
-
-        // If work creation is successful, proceed with image upload
-        const slide = await handleImageUpload({
-            image: { name: work.name },
-            file: image,
-            type: "works",
-        });
-
-        work.slides.push(slide);
-
-        const updatedWork = await updateWork(work);
-        if (!updatedWork) {
-            return res.status(404).json({ error: "Work not found" });
-        }
-
-        console.info(
-            `The slide was successfully added to work:
-                name: ${work.name}
-                id: ${_id}
-                slide: ${JSON.stringify(slide)}
-            `
-        );
-
-        console.info("=== Slide Addition Complete ===");
-        return res.status(200).json(updatedWork);
-    } catch (err) {
-        console.error("Error adding slide to work:", err.message);
-        console.info("=== Slide Addition Complete ===");
-        return res
-            .status(500)
-            .json({ error: `Something went wrong: ${err.message}` });
-    }
-}
-
 console.info("=== End of Work Controller ===");
 
 module.exports = {
     httpGetFilteredAndSortedWorks,
-    httpGetImagesWork,
     httpGetCategoriesWorks,
     httpCreateWork,
     httpUpdatedWork,
     httpGetTechnologies,
     httpDeleteWork,
-    httpAddSlideWork,
 };
