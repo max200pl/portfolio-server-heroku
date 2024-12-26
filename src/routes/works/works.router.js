@@ -1,19 +1,24 @@
 const express = require("express");
 const {
-    httpGetImagesWork,
     httpGetCategoriesWorks,
-    httpCreateWork, // Corrected import
+    httpCreateWork,
     httpGetTechnologies,
     httpUpdatedWork,
     httpDeleteWork,
     httpGetFilteredAndSortedWorks,
 } = require("./works.controller");
+const {
+    httpAddSlide,
+    httpDeleteSlide,
+    httpUpdateSlide,
+} = require("./slides.controller");
 const worksRouter = express.Router();
 
 const upload = require("../../utils/multerConfig");
 
 worksRouter.get("/", httpGetFilteredAndSortedWorks);
 worksRouter.delete("/delete", httpDeleteWork);
+
 worksRouter.post(
     "/create",
     upload,
@@ -23,8 +28,9 @@ worksRouter.post(
         }
         next();
     },
-    httpCreateWork // Corrected function name
+    httpCreateWork
 );
+
 worksRouter.put(
     "/update",
     upload,
@@ -36,7 +42,42 @@ worksRouter.put(
     },
     httpUpdatedWork
 );
-worksRouter.get("/image", httpGetImagesWork);
+
+worksRouter.post(
+    "/add-slide",
+    upload,
+    (req, res, next) => {
+        if (!req.query._id || !req.file) {
+            return res.status(400).json({ error: "Invalid request data" });
+        }
+        next();
+    },
+    httpAddSlide
+);
+
+worksRouter.delete(
+    "/delete-slide",
+    (req, res, next) => {
+        if (!req.query._id || !req.query.slideId) {
+            return res.status(400).json({ error: "Invalid request data" });
+        }
+        next();
+    },
+    httpDeleteSlide
+);
+
+worksRouter.put(
+    "/update-slide",
+    upload,
+    (req, res, next) => {
+        if (!req.query._id || !req.query.slideId || !req.file) {
+            return res.status(400).json({ error: "Invalid request data" });
+        }
+        next();
+    },
+    httpUpdateSlide
+);
+
 worksRouter.get("/categories", httpGetCategoriesWorks);
 worksRouter.get("/technologies", httpGetTechnologies);
 
