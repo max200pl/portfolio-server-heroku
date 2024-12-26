@@ -25,9 +25,16 @@ async function httpAddSlide(req, res) {
             type: "works",
         });
 
+        // Determine the maximum order among existing slides
+        const maxOrder = await Slide.find({ work: _id })
+            .sort({ order: -1 })
+            .limit(1)
+            .then((slides) => (slides.length ? slides[0].order : 0));
+
         const slide = new Slide({
             ...slideData,
             work: _id,
+            order: maxOrder + 1, // Set the slide order
         });
 
         await slide.save();
@@ -73,11 +80,19 @@ async function httpDeleteSlide(req, res) {
             return res.status(404).json({ error: "Slide not found" });
         }
 
+        const slideOrder = slide.order;
+
         await handleImageDeletion(slide);
         await slide.remove();
 
         work.slides.pull(slideId);
         await work.save();
+
+        // Update order for all subsequent slides
+        await Slide.updateMany(
+            { work: _id, order: { $gt: slideOrder } },
+            { $inc: { order: -1 } }
+        );
 
         console.info(
             `The slide was successfully deleted from work:
@@ -100,6 +115,7 @@ async function httpDeleteSlide(req, res) {
 
 async function httpUpdateSlide(req, res) {
     const { _id, slideId } = req.query;
+    const { order } = req.body;
     const image = req.file;
     console.info("=== Updating Slide in Work ===");
     console.info("Current work for slide update:", _id);
@@ -127,7 +143,10 @@ async function httpUpdateSlide(req, res) {
             type: "works",
         });
 
-        slide.set(newSlideData);
+        slide.set({
+            ...newSlideData,
+            order: order !== undefined ? order : slide.order, // Update order if provided
+        });
         await slide.save();
 
         console.info(
@@ -149,8 +168,45 @@ async function httpUpdateSlide(req, res) {
     }
 }
 
+/**
+ * @function httpUpdateSlidesOrder
+ * @param {{
+ *  body: {
+ *      slides: Array<{ _id: string }>
+ *  }
+ * }} req - request object
+ * @return {Promise}
+ */
+async function httpUpdateSlidesOrder(req, res) {
+    const { slides } = req.body;
+    console.info("=== Updating Slides Order ===");
+
+    try {
+        const bulkOps = slides.map((slide, index) => ({
+            updateOne: {
+                filter: { _id: slide._id },
+                update: { order: index },
+            },
+        }));
+
+        await Slide.bulkWrite(bulkOps); // Update slide order in a single database request (bulkWrite)
+
+        console.info("=== Slides Order Update Complete ===");
+        return res
+            .status(200)
+            .json({ message: "Slides order updated successfully" });
+    } catch (err) {
+        console.error("Error updating slides order:", err.message);
+        console.info("=== Slides Order Update Complete ===");
+        return res
+            .status(500)
+            .json({ error: `Something went wrong: ${err.message}` });
+    }
+}
+
 module.exports = {
     httpAddSlide,
     httpDeleteSlide,
     httpUpdateSlide,
+    httpUpdateSlidesOrder,
 };
