@@ -11,6 +11,7 @@ const slideSchema = new mongoose.Schema(
             ref: "Works",
             required: true,
         },
+        order: { type: Number, default: undefined },
     },
     { timestamps: true }
 );
