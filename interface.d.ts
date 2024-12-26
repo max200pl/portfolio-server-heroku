@@ -1,3 +1,15 @@
+interface WorkUniqueId {
+    $oid: string;
+}
+
+interface SlideUniqueId {
+    $oid: string;
+}
+
+interface CategoryUniqueId {
+    $oid: string;
+}
+
 interface Tech {
     name: string;
     apply: number;
@@ -9,16 +21,17 @@ interface Image {
     destination: string;
     size: number;
 }
-
 interface Category {
+    _id: CategoryUniqueId;
     label: string;
     description?: string;
 }
 
 interface Work {
+    _id: WorkUniqueId;
     name: string;
     dateFinished: Date;
-    category: string;
+    category: CategoryUniqueId;
     client?: string;
     link?: string;
     frontTech?: {
@@ -28,7 +41,11 @@ interface Work {
         [key: string]: Tech[];
     };
     cardImage?: Image;
-    images?: Image[];
+    slides?: SlideUniqueId[];
 }
 
-interface Slide extends Image {}
+interface Slide extends Image {
+    _id: SlideUniqueId;
+    work: WorkUniqueId;
+    order?: number; // specifies the sequence or position of the slide
+}
