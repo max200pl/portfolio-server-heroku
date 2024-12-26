@@ -3,7 +3,7 @@ const Work = require("../../db/works.mongo");
 const {
     handleImageUpload,
     handleImageDeletion,
-} = require("../../utils/imageHandler");
+} = require("../../utils/images");
 
 async function httpAddSlide(req, res) {
     const { _id } = req.query;
