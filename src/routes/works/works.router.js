@@ -11,6 +11,7 @@ const {
     httpAddSlide,
     httpDeleteSlide,
     httpUpdateSlide,
+    httpUpdateSlidesOrder,
 } = require("./slides.controller");
 const worksRouter = express.Router();
 
@@ -77,6 +78,8 @@ worksRouter.put(
     },
     httpUpdateSlide
 );
+
+worksRouter.put("/slides/order", httpUpdateSlidesOrder);
 
 worksRouter.get("/categories", httpGetCategoriesWorks);
 worksRouter.get("/technologies", httpGetTechnologies);
