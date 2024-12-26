@@ -2,6 +2,7 @@ const multer = require("multer");
 
 const storage = multer.memoryStorage();
 
+// Ensure only image files are uploaded
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
         cb(null, true);
@@ -11,11 +12,13 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+// Configure multer with the storage and file filter
 const multerConfig = multer({
-    storage: storage,
-    fileFilter: fileFilter,
+    storage,
+    fileFilter,
 }).single("image"); // Ensure this matches the field name in the request
 
+// Middleware to handle file uploads
 const uploadMiddleware = (req, res, next) => {
     multerConfig(req, res, (err) => {
         if (err instanceof multer.MulterError) {
