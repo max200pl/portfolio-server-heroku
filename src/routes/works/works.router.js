@@ -5,14 +5,14 @@ const {
     httpGetTechnologies,
     httpUpdatedWork,
     httpDeleteWork,
+    httpUpdateSlidesOrder,
     httpGetFilteredAndSortedWorks,
 } = require("./works.controller");
 const {
-    httpAddSlide,
-    httpDeleteSlide,
-    httpUpdateSlide,
-    httpUpdateSlidesOrder,
-} = require("./slides.controller");
+    httpAddSlideToWork,
+    httpDeleteSlideFromWork,
+    httpUpdateSlideToWork,
+} = require("./workSlides.controller");
 const worksRouter = express.Router();
 
 const upload = require("../../utils/multerConfig");
@@ -24,7 +24,8 @@ worksRouter.post(
     "/create",
     upload,
     (req, res, next) => {
-        if (!req.body || !req.file) {
+        if (!req.body) {
+            console.error("Invalid request data");
             return res.status(400).json({ error: "Invalid request data" });
         }
         next();
@@ -53,7 +54,7 @@ worksRouter.post(
         }
         next();
     },
-    httpAddSlide
+    httpAddSlideToWork
 );
 
 worksRouter.delete(
@@ -64,7 +65,7 @@ worksRouter.delete(
         }
         next();
     },
-    httpDeleteSlide
+    httpDeleteSlideFromWork
 );
 
 worksRouter.put(
@@ -76,7 +77,7 @@ worksRouter.put(
         }
         next();
     },
-    httpUpdateSlide
+    httpUpdateSlideToWork
 );
 
 worksRouter.put("/slides/order", httpUpdateSlidesOrder);
