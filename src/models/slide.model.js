@@ -1,73 +1,119 @@
-const mongoose = require("mongoose");
+const Slide = require("../db/slides.mongo");
 
-const SlideSchema = new mongoose.Schema(
-    {
-        imageUrl: {
-            type: String,
-            required: true,
-        },
-        caption: {
-            type: String,
-            required: false,
-        },
-        work: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Work",
-            required: true,
-        },
-    },
-    {
-        timestamps: true,
-    }
-);
-
-const Slide = mongoose.model("Slide", SlideSchema);
-
-async function createSlide(slide) {
+async function createSlide(model, itemId, imageData, type) {
     try {
-        const result = await Slide.create(slide);
-        console.log("Slide created in database");
-        return result;
+        const item = await model.findById(itemId);
+        if (!item) {
+            throw new Error(`${type} not found`);
+        }
+
+        // Determine the maximum order among existing items
+        const maxOrder = await Slide.find({ work: itemId })
+            .sort({ order: -1 })
+            .limit(1)
+            .then((items) => (items.length ? items[0].order : 0));
+
+        const newItem = new Slide({
+            ...imageData,
+            work: itemId,
+            order: maxOrder + 1, // Set the item order
+        });
+
+        await newItem.save();
+        item.slides.push(newItem._id);
+        await item.save();
+
+        return newItem;
     } catch (err) {
-        console.log(`Could not save slide ${err}`);
+        console.error(`Error creating slide: ${err.message}`);
+        throw err;
     }
 }
 
-async function updateSlide(slideId, slide) {
+async function deleteSlideFromItem(model, itemId, slideId, type) {
     try {
-        const result = await Slide.findByIdAndUpdate(
-            slideId,
-            { $set: slide },
-            { new: true, useFindAndModify: false }
+        const item = await model.findById(itemId);
+        if (!item) {
+            throw new Error(`${type} not found`);
+        }
+
+        const slide = await Slide.findById(slideId);
+        if (!slide) {
+            throw new Error("Slide not found");
+        }
+
+        const slideOrder = slide.order;
+
+        await slide.remove();
+
+        item.slides.pull(slideId);
+        await item.save();
+
+        // Update order for all subsequent slides
+        await Slide.updateMany(
+            { work: itemId, order: { $gt: slideOrder } },
+            { $inc: { order: -1 } }
         );
-        if (!result) {
-            console.log(`Slide not found with ID ${slideId}`);
-            return null;
-        }
-        console.log("Slide updated in database");
-        return result;
+
+        return slide;
     } catch (err) {
-        console.log(`Error updating Slide with ID ${slideId}: ${err}`);
+        console.error(`Error deleting slide: ${err.message}`);
+        throw err;
     }
 }
 
-async function deleteSlide(slideId) {
+async function updateSlideInItem(
+    model,
+    itemId,
+    slideId,
+    newSlideData,
+    order,
+    type
+) {
     try {
-        const result = await Slide.findByIdAndDelete(slideId);
-        if (!result) {
-            console.log(`Slide not found with ID ${slideId}`);
-            return null;
+        const item = await model.findById(itemId);
+        if (!item) {
+            throw new Error(`${type} not found`);
         }
-        console.log("Slide deleted from database");
-        return result;
+
+        const slide = await Slide.findById(slideId);
+        if (!slide) {
+            throw new Error("Slide not found");
+        }
+
+        slide.set({
+            ...newSlideData,
+            order: order !== undefined ? order : slide.order, // Update order if provided
+        });
+        await slide.save();
+
+        return slide;
     } catch (err) {
-        console.log(`Error deleting Slide with ID ${slideId}: ${err}`);
+        console.error(`Error updating slide: ${err.message}`);
+        throw err;
+    }
+}
+
+async function updateSlidesOrder(slides) {
+    try {
+        const bulkOps = slides.map((slide, index) => ({
+            updateOne: {
+                filter: { _id: slide._id },
+                update: { order: index },
+            },
+        }));
+
+        await Slide.bulkWrite(bulkOps); // Update slide order in a single database request (bulkWrite)
+    } catch (err) {
+        console.error(`Error updating slides order: ${err.message}`);
+        throw err;
     }
 }
 
 module.exports = {
-    createSlide,
-    updateSlide,
-    deleteSlide,
     Slide,
+    createSlide,
+    deleteSlideFromItem,
+    updateSlideInItem,
+    updateSlidesOrder,
 };
