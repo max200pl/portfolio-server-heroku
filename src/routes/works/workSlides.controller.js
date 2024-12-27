@@ -15,25 +15,49 @@ async function httpAddSlideToWork(req, res) {
     const image = req.file;
     console.info("=== Adding Slide to Work ===");
     console.info("Current work for slide addition:", _id);
+    console.info(
+        "Current image for slide addition:",
+        image ? image.originalname : "No image uploaded"
+    );
 
     try {
-        const imageData = await handleImageUpload({
-            image: { name: (await Work.findById(_id)).name },
-            file: image,
-            type: "works",
-        });
-        const slide = await createSlide(Work, _id, imageData, "works");
+        const newSlide = await createSlide(Work, _id, {}, "works");
+        console.log("Create slide success:", newSlide);
 
-        console.info(
-            `The slide was successfully added to work:
-                name: ${slide.work.name}
-                id: ${_id}
-                slide: ${JSON.stringify(slide)}
-            `
-        );
+        if (image) {
+            try {
+                const slideImage = await handleImageUpload({
+                    image: { name: newSlide._id.toString() },
+                    file: image,
+                    type: "slides",
+                });
+
+                newSlide.image = {
+                    blurHash: slideImage.blurHash,
+                    destination: slideImage.destination,
+                    url: slideImage.url,
+                    size: image.size,
+                };
+
+                await newSlide.save();
+                console.log(
+                    "Slide created and image uploaded successfully:",
+                    newSlide
+                );
+            } catch (err) {
+                await deleteSlideFromItem(Work, _id, newSlide._id, "works");
+                console.error(
+                    "Error uploading image, slide deleted:",
+                    err.message
+                );
+                return res
+                    .status(500)
+                    .json({ message: `Image upload failed: ${err.message}` });
+            }
+        }
 
         console.info("=== Slide Addition Complete ===");
-        return res.status(200).json(slide);
+        return res.status(201).json(newSlide);
     } catch (err) {
         console.error("Error adding slide to work:", err.message);
         console.info("=== Slide Addition Complete ===");
@@ -76,32 +100,56 @@ async function httpUpdateSlideToWork(req, res) {
     const image = req.file;
     console.info("=== Updating Slide in Work ===");
     console.info("Current work for slide update:", _id);
+    console.info(
+        "Current image for slide update:",
+        image ? image.originalname : "No image uploaded"
+    );
 
     try {
-        const newSlideData = await handleImageUpload({
-            image: { name: (await Work.findById(_id)).name },
-            file: image,
-            type: "works",
-        });
-        const slide = await updateSlideInItem(
+        const updatedSlide = await updateSlideInItem(
             Work,
             _id,
             slideId,
-            newSlideData,
+            {},
             order,
-            "work"
+            "works"
         );
-        await handleImageDeletion(slide);
+        console.log("Update slide success:", updatedSlide);
 
-        console.info(
-            `The slide was successfully updated in work:
-                id: ${_id}
-                slide: ${JSON.stringify(slide)}
-            `
-        );
+        if (image) {
+            try {
+                const slideImage = await handleImageUpload({
+                    image: { name: updatedSlide._id.toString() },
+                    file: image,
+                    type: "slides",
+                });
+
+                updatedSlide.image = {
+                    blurHash: slideImage.blurHash,
+                    destination: slideImage.destination,
+                    url: slideImage.url,
+                    size: image.size,
+                };
+
+                await updatedSlide.save();
+                console.log(
+                    "Slide updated and image uploaded successfully:",
+                    updatedSlide
+                );
+            } catch (err) {
+                await deleteSlideFromItem(Work, _id, updatedSlide._id, "works");
+                console.error(
+                    "Error uploading image, slide deleted:",
+                    err.message
+                );
+                return res
+                    .status(500)
+                    .json({ message: `Image upload failed: ${err.message}` });
+            }
+        }
 
         console.info("=== Slide Update Complete ===");
-        return res.status(200).json(slide);
+        return res.status(200).json(updatedSlide);
     } catch (err) {
         console.error("Error updating slide in work:", err.message);
         console.info("=== Slide Update Complete ===");
