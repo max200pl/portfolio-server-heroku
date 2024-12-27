@@ -32,9 +32,8 @@ async function createSlide(model, itemId, imageData, type) {
 
 async function deleteSlideFromItem(model, itemId, slideId, type) {
     try {
-        const item = await model.findById(itemId);
-        if (!item) {
-            throw new Error(`${type} not found`);
+        if (!slideId) {
+            throw new Error("Slide ID not provided");
         }
 
         const slide = await Slide.findById(slideId);
@@ -42,18 +41,25 @@ async function deleteSlideFromItem(model, itemId, slideId, type) {
             throw new Error("Slide not found");
         }
 
-        const slideOrder = slide.order;
+        if (itemId) {
+            const item = await model.findById(itemId);
+            if (!item) {
+                throw new Error(`${type} not found`);
+            }
 
-        await slide.remove();
+            const slideOrder = slide.order;
+            await slide.remove();
+            item.slides.pull(slideId);
+            await item.save();
 
-        item.slides.pull(slideId);
-        await item.save();
-
-        // Update order for all subsequent slides
-        await Slide.updateMany(
-            { work: itemId, order: { $gt: slideOrder } },
-            { $inc: { order: -1 } }
-        );
+            // Update order for all subsequent slides
+            await Slide.updateMany(
+                { work: itemId, order: { $gt: slideOrder } },
+                { $inc: { order: -1 } }
+            );
+        } else {
+            await slide.remove();
+        }
 
         return slide;
     } catch (err) {
@@ -71,14 +77,20 @@ async function updateSlideInItem(
     type
 ) {
     try {
-        const item = await model.findById(itemId);
-        if (!item) {
-            throw new Error(`${type} not found`);
+        if (!slideId) {
+            throw new Error("Slide ID not provided");
         }
 
         const slide = await Slide.findById(slideId);
         if (!slide) {
             throw new Error("Slide not found");
+        }
+
+        if (itemId) {
+            const item = await model.findById(itemId);
+            if (!item) {
+                throw new Error(`${type} not found`);
+            }
         }
 
         slide.set({
