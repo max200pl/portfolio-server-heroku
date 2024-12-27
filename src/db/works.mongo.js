@@ -12,7 +12,7 @@ const cardImageSchema = new mongoose.Schema(
         destination: { type: String, required: true },
         size: { type: Number, required: true },
     },
-    { _id: false }
+    { _id: false, default: undefined }
 );
 
 const workSchema = new mongoose.Schema(
@@ -29,7 +29,15 @@ const workSchema = new mongoose.Schema(
         frontTech: { type: Map, of: [techSchema], default: undefined },
         backTech: { type: Map, of: [techSchema], default: undefined },
         cardImage: cardImageSchema,
-        slides: [{ type: mongoose.Schema.Types.ObjectId, ref: "Slide" }], // Ссылки на слайды
+        slides: {
+            type: [
+                {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Slide",
+                },
+            ],
+            default: undefined,
+        },
     },
     { timestamps: true }
 );
