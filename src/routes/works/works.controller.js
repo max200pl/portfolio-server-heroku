@@ -58,35 +58,67 @@ async function httpGetTechnologies(req, res) {
 }
 
 async function httpCreateWork(req, res) {
-    const work = parseDeep(req.body);
-    const image = req.file;
+    const { name, dateFinished, category, client, link, frontTech, backTech } =
+        req.body;
+    const file = req.file;
 
-    if (!work || !image) {
-        return res.status(400).json({ error: "Missing required fields" });
+    console.log("=== Creating Work ===");
+    console.log("Current work for create:", req.body);
+    console.log(
+        "Current image for create:",
+        file ? file.originalname : "No image uploaded"
+    );
+
+    if (!name || !category) {
+        console.info("Missing required fields");
+        console.info("=== Work Creation Complete ===");
+        return res.status(400).json({ message: "Missing required fields" });
     }
 
+    let result;
     try {
-        console.log("=== Creating Work ===");
+        let workData = {
+            name,
+            dateFinished,
+            category,
+            client,
+            link,
+            frontTech,
+            backTech,
+        };
 
         // Create work in the database first
-        const result = await createWork(work);
+        result = await createWork(workData);
         console.log("Create work success:", result);
 
         // If work creation is successful, proceed with image upload
-        const cardImage = await handleImageUpload({
-            image: { name: work.name },
-            file: image,
-            type: "works",
-        });
+        if (file) {
+            const cardImage = await handleImageUpload({
+                image: { name: name },
+                file,
+                type: "works",
+            });
 
-        work.cardImage = cardImage;
+            workData.cardImage = {
+                blurHash: cardImage.blurHash,
+                destination: cardImage.destination,
+                url: cardImage.url,
+                size: file.size,
+            };
 
-        // Update the work in the database with the cardImage details
-        const updatedResult = await updateWork({ ...work, _id: result._id });
-        console.log("Update work with cardImage success:", updatedResult);
+            // Update the work in the database with the cardImage details
+            const updatedResult = await updateWork({
+                ...result.toObject(),
+                cardImage: workData.cardImage,
+            });
+            console.log("Update work with cardImage success:", updatedResult);
 
-        console.log("=== Work Creation Complete ===");
-        return res.status(201).json(updatedResult);
+            console.info("=== Work Creation Complete ===");
+            return res.status(201).json(updatedResult);
+        }
+
+        console.info("=== Work Creation Complete ===");
+        return res.status(201).json(result);
     } catch (err) {
         console.error("Error creating work:", err.message);
 
@@ -99,7 +131,8 @@ async function httpCreateWork(req, res) {
             );
         }
 
-        res.status(500).json({
+        console.info("=== Work Creation Complete ===");
+        return res.status(500).json({
             message: `Invalid input: ${err.message}`,
             details: err.errors,
         });
