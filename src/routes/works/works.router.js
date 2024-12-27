@@ -5,13 +5,13 @@ const {
     httpGetTechnologies,
     httpUpdatedWork,
     httpDeleteWork,
-    httpUpdateSlidesOrder,
     httpGetFilteredAndSortedWorks,
 } = require("./works.controller");
 const {
     httpAddSlideToWork,
     httpDeleteSlideFromWork,
     httpUpdateSlideToWork,
+    httpUpdateSlidesOrder,
 } = require("./workSlides.controller");
 const worksRouter = express.Router();
 
