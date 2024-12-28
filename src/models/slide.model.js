@@ -48,7 +48,7 @@ async function deleteSlideFromItem(model, itemId, slideId, type) {
             }
 
             const slideOrder = slide.order;
-            await slide.remove();
+            await slide.deleteOne();
             item.slides.pull(slideId);
             await item.save();
 
@@ -58,7 +58,7 @@ async function deleteSlideFromItem(model, itemId, slideId, type) {
                 { $inc: { order: -1 } }
             );
         } else {
-            await slide.remove();
+            await slide.deleteOne();
         }
 
         return slide;
