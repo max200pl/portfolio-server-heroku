@@ -76,10 +76,13 @@ async function httpDeleteSlideFromWork(req, res) {
         const slide = await deleteSlideFromItem(Work, _id, slideId, "work");
         await handleImageDeletion(slide);
 
+        console.info("Deleting image from Firebase:", slide.destination);
+        console.info("Image deleted from Firebase:", slide.destination);
+
         console.info(
             `The slide was successfully deleted from work:
                 id: ${_id}
-                slide: ${JSON.stringify(slide)}
+                slide: ${JSON.stringify(slide, null, 2)}
             `
         );
 
