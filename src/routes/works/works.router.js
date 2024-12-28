@@ -60,8 +60,10 @@ worksRouter.post(
 worksRouter.delete(
     "/delete-slide",
     (req, res, next) => {
-        if (!req.query._id || !req.query.slideId) {
-            return res.status(400).json({ error: "Invalid request data" });
+        if (!req.query.slideId) {
+            return res
+                .status(400)
+                .json({ error: `Invalid request data ${req.query}` });
         }
         next();
     },
