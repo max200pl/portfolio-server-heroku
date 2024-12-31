@@ -1,10 +1,23 @@
 const Slide = require("../db/slides.mongo");
 
+/**
+ *
+ * @param {*} model
+ * @param {*} itemId
+ * @param {*} imageData
+ * @param {*} type
+ * @returns {Promise<Slide>}
+ */
 async function createSlide(model, itemId, imageData, type) {
     try {
         const item = await model.findById(itemId);
         if (!item) {
             throw new Error(`${type} not found`);
+        }
+
+        // Initialize slides array if it doesn't exist
+        if (!item.slides) {
+            item.slides = [];
         }
 
         // Determine the maximum order among existing items

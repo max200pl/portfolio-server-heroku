@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const slideSchema = new mongoose.Schema(
     {
-        blurHash: { type: String, required: true },
-        url: { type: String, required: true },
-        destination: { type: String, required: true },
-        size: { type: Number, required: true },
+        blurHash: { type: String },
+        url: { type: String },
+        destination: { type: String },
+        size: { type: Number },
         work: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Works",

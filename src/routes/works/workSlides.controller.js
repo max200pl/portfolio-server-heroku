@@ -21,23 +21,30 @@ async function httpAddSlideToWork(req, res) {
     );
 
     try {
+        const work = await Work.findById(_id);
+        if (!work) {
+            throw new Error("Work not found");
+        }
+
         const newSlide = await createSlide(Work, _id, {}, "works");
         console.log("Create slide success:", newSlide);
 
         if (image) {
             try {
                 const slideImage = await handleImageUpload({
-                    image: { name: newSlide._id.toString() },
+                    image: {
+                        name: `${work.name}/slideId_${newSlide._id.toString()}`,
+                    },
                     file: image,
-                    type: "slides",
+                    type: "works",
                 });
 
-                newSlide.image = {
+                newSlide.set({
                     blurHash: slideImage.blurHash,
                     destination: slideImage.destination,
                     url: slideImage.url,
                     size: image.size,
-                };
+                });
 
                 await newSlide.save();
                 console.log(
@@ -76,9 +83,6 @@ async function httpDeleteSlideFromWork(req, res) {
         const slide = await deleteSlideFromItem(Work, _id, slideId, "work");
         await handleImageDeletion(slide);
 
-        console.info("Deleting image from Firebase:", slide.destination);
-        console.info("Image deleted from Firebase:", slide.destination);
-
         console.info(
             `The slide was successfully deleted from work:
                 id: ${_id}
@@ -109,6 +113,11 @@ async function httpUpdateSlideToWork(req, res) {
     );
 
     try {
+        const work = await Work.findById(_id);
+        if (!work) {
+            throw new Error("Work not found");
+        }
+
         const updatedSlide = await updateSlideInItem(
             Work,
             _id,
@@ -122,17 +131,17 @@ async function httpUpdateSlideToWork(req, res) {
         if (image) {
             try {
                 const slideImage = await handleImageUpload({
-                    image: { name: updatedSlide._id.toString() },
+                    image: { name: work.name },
                     file: image,
                     type: "slides",
                 });
 
-                updatedSlide.image = {
+                updatedSlide.set({
                     blurHash: slideImage.blurHash,
                     destination: slideImage.destination,
                     url: slideImage.url,
                     size: image.size,
-                };
+                });
 
                 await updatedSlide.save();
                 console.log(
