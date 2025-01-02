@@ -33,10 +33,10 @@ async function httpAddSlideToWork(req, res) {
             try {
                 const slideImage = await handleImageUpload({
                     image: {
-                        name: `${work.name}/slideId_${newSlide._id.toString()}`,
+                        name: work.name,
                     },
                     file: image,
-                    type: "works",
+                    type: "slides",
                 });
 
                 newSlide.set({
