@@ -18,7 +18,7 @@ const cardImageSchema = new mongoose.Schema(
 const workSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
-        dateFinished: { type: Date, required: true },
+        dateFinished: { type: Date, default: undefined },
         category: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,

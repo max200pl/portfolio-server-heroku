@@ -49,3 +49,8 @@ interface Slide extends Image {
     work: WorkUniqueId;
     order?: number; // specifies the sequence or position of the slide
 }
+
+interface WorkTechnologies {
+    frontend: ITechnology[];
+    backend: ITechnology[];
+}
