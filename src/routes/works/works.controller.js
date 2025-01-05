@@ -58,8 +58,7 @@ async function httpGetTechnologies(req, res) {
 }
 
 async function httpCreateWork(req, res) {
-    const { name, dateFinished, category, client, link, frontTech, backTech } =
-        req.body;
+    let workData = parseDeep(req.body);
     const file = req.file;
 
     console.log("=== Creating Work ===");
@@ -69,7 +68,7 @@ async function httpCreateWork(req, res) {
         file ? file.originalname : "No image uploaded"
     );
 
-    if (!name || !category) {
+    if (!workData.name || !workData.category) {
         console.info("Missing required fields");
         console.info("=== Work Creation Complete ===");
         return res.status(400).json({ message: "Missing required fields" });
@@ -77,16 +76,6 @@ async function httpCreateWork(req, res) {
 
     let result;
     try {
-        let workData = {
-            name,
-            dateFinished,
-            category,
-            client,
-            link,
-            frontTech,
-            backTech,
-        };
-
         // Create work in the database first
         result = await createWork(workData);
         console.log("Create work success:", result);
@@ -94,7 +83,7 @@ async function httpCreateWork(req, res) {
         // If work creation is successful, proceed with image upload
         if (file) {
             const cardImage = await handleImageUpload({
-                image: { name: name },
+                image: { name: workData.name },
                 file,
                 type: "works",
             });
