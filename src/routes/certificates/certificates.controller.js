@@ -10,6 +10,7 @@ const {
     handleImageUpload,
     handleImageDeletion,
 } = require("../../utils/images");
+const { parseDeep } = require("../../helpers/helpers");
 
 async function httpGetAllCertificates(req, res) {
     const { category } = req.query;
@@ -43,7 +44,7 @@ async function httpGetCategoriesCertificates(req, res) {
 }
 
 async function httpCreateCertificate(req, res) {
-    const { name, dateFinished, category, link } = req.body;
+    let certificateData = parseDeep(req.body);
     const file = req.file;
 
     console.log("=== Creating Certificate ===");
@@ -53,7 +54,7 @@ async function httpCreateCertificate(req, res) {
         file ? file.originalname : "No image uploaded"
     );
 
-    if (!name || !category) {
+    if (!certificateData.name || !certificateData.category) {
         console.info("Missing required fields");
         console.info("=== Certificate Creation Complete ===");
         return res.status(400).json({ message: "Missing required fields" });
@@ -61,13 +62,6 @@ async function httpCreateCertificate(req, res) {
 
     let result;
     try {
-        let certificateData = {
-            name,
-            dateFinished,
-            category,
-            link,
-        };
-
         // Create certificate in the database first
         result = await createCertificate(certificateData);
         console.log("Create certificate success:", result);
@@ -75,7 +69,7 @@ async function httpCreateCertificate(req, res) {
         // If certificate creation is successful, proceed with image upload
         if (file) {
             const cardImage = await handleImageUpload({
-                image: { name: name },
+                image: { name: certificateData.name },
                 file,
                 type: "certificates",
             });
