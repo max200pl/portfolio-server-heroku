@@ -13,14 +13,14 @@ const imageSchema = new mongoose.Schema(
 const certificateSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
-        dateFinished: { type: Date },
+        dateFinished: { type: Date, required: false },
         category: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
             ref: "CategoryCertificate",
         },
         cardImage: { type: imageSchema, required: false },
-        link: { type: String },
+        link: { type: String, required: false },
     },
     { timestamps: true }
 );
