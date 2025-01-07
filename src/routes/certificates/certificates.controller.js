@@ -118,7 +118,7 @@ async function httpCreateCertificate(req, res) {
 }
 
 async function httpUpdateCertificate(req, res) {
-    let newCertificate = req.body;
+    let newCertificate = parseDeep(req.body);
     const image = req.file;
 
     try {
@@ -134,11 +134,11 @@ async function httpUpdateCertificate(req, res) {
         console.log("Old Certificate ID:", oldCertificate._id);
         console.log(
             "Old Certificate Data from Database:",
-            JSON.parse(JSON.stringify(oldCertificate))
-        ); // Convert to regular object
+            JSON.stringify(oldCertificate, null, 2)
+        );
         console.log(
             "New Certificate Data from Front-end:",
-            JSON.parse(JSON.stringify(newCertificate))
+            JSON.stringify(newCertificate, null, 2)
         );
         console.log(
             "Uploaded Image:",
@@ -159,34 +159,30 @@ async function httpUpdateCertificate(req, res) {
                 type: "certificates",
             });
 
-            newCertificate = {
-                ...newCertificate,
-                cardImage: {
-                    blurHash,
-                    destination,
-                    url,
-                    size,
-                },
+            newCertificate.cardImage = {
+                blurHash,
+                destination,
+                url,
+                size: image.size,
             };
 
             console.log("Updated certificate data prepared.");
-            await updateCertificate(newCertificate);
         } else {
             console.log("Image has not changed, skipping image update.");
-            await updateCertificate({
-                ...oldCertificate,
-                ...newCertificate,
-            });
-            console.log(
-                "Certificate updated in database without image change."
-            );
         }
 
-        const populatedCertificate = await getCertificateById(
-            newCertificate._id
-        );
+        // Dynamically update fields
+        Object.keys(newCertificate).forEach((key) => {
+            oldCertificate[key] = newCertificate[key];
+        });
+
+        const updatedCertificate = await updateCertificate(oldCertificate);
+        if (!updatedCertificate) {
+            return res.status(404).json({ error: "Certificate not found" });
+        }
+
         console.log("=== Certificate Update Complete ===");
-        return res.status(200).json(populatedCertificate);
+        return res.status(200).json(updatedCertificate);
     } catch (err) {
         console.error("Error updating certificate:", err.message);
         return res.status(500).json({
