@@ -1,4 +1,4 @@
-const admin = require("../utils/firebaseAdmin");
+const { admin } = require("../utils/firebaseAdmin");
 
 async function verifyIdToken(req, res, next) {
     const idToken = req.body.idToken;
