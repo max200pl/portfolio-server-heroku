@@ -2,47 +2,35 @@ const User = require("../db/users.mongo");
 
 async function updateUser(user) {
     try {
-        return await User.findOneAndUpdate({
-            $or: [
-                { email: user.email },
-                { googleId: user.googleId },
-                { githubId: user.githubId }
-            ]
-        }, {
-            $set: { ...user }
-        }, {
-            upsert: true, new: true,
-            projection: {
-                _id: 0,
-                __v: 0,
-            }
-        });
+        return await User.findOneAndUpdate(
+            { uid: user.uid },
+            { $set: { ...user, updatedAt: new Date() } },
+            { upsert: true, new: true }
+        );
     } catch (err) {
-        console.log(`Could not create a new User: ${err}`);
+        console.log(`Could not update the User: ${err}`);
     }
 }
 
 /**
- * @param {{email?: string, googleId?: string, githubId?: string}} user
+ * @param {{uid?: string, email?: string}} user
  * @returns {Promise<object>}
  */
 async function findUser(user) {
     try {
         return await User.findOne(
             {
-                $or: [
-                    { email: user.email },
-                    { githubId: user.githubId },
-                ],
+                $or: [{ uid: user.uid }, { email: user.email }],
             },
             {
                 projection: {
                     _id: 0,
                     __v: 0,
-                }
-            });
+                },
+            }
+        );
     } catch (err) {
-        console.log(`Could not fined a new User: ${err}`);
+        console.log(`Could not find the User: ${err}`);
     }
 }
 
@@ -59,9 +47,8 @@ async function createUser(user) {
     }
 }
 
-
 module.exports = {
     updateUser,
     findUser,
     createUser,
-}
+};
