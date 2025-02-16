@@ -3,8 +3,7 @@ const { logCompletion } = require("../../utils/logger");
 require("dotenv").config();
 
 async function httpGoogleAuthorization(codeResponse) {
-    console.log("=== Google Authorization ===");
-    console.log("Code Response:", codeResponse);
+    console.log("[Google Authorization] Code Response:", codeResponse);
 
     try {
         const response = await axios({
@@ -17,19 +16,18 @@ async function httpGoogleAuthorization(codeResponse) {
             },
         });
 
-        console.log("Google Authorization successful:", response.data);
+        console.log("[Google Authorization] Successful:", response.data);
         logCompletion("Google Authorization");
         return response.data;
     } catch (error) {
-        console.error("Error during Google authorization:", error.message);
+        console.error("[Google Authorization] Error:", error.message);
         logCompletion("Google Authorization");
         return error;
     }
 }
 
 async function httpAuthGitHubAuthentication(codeResponse) {
-    console.log("=== GitHub Authentication ===");
-    console.log("Code Response:", codeResponse);
+    console.log("[GitHub Authentication] Code Response:", codeResponse);
 
     try {
         const response = await axios({
@@ -46,19 +44,21 @@ async function httpAuthGitHubAuthentication(codeResponse) {
             },
         });
 
-        console.info("GitHub Authentication successful:", response.statusText);
+        console.info(
+            "[GitHub Authentication] Successful:",
+            response.statusText
+        );
         logCompletion("GitHub Authentication");
         return response.data;
     } catch (error) {
-        console.error("Error during GitHub authentication:", error.message);
+        console.error("[GitHub Authentication] Error:", error.message);
         logCompletion("GitHub Authentication");
         return error;
     }
 }
 
 async function httpAuthGitHubAuthorization(codeResponse) {
-    console.log("=== GitHub Authorization ===");
-    console.log("Code Response:", codeResponse);
+    console.log("[GitHub Authorization] Code Response:", codeResponse);
 
     try {
         const response = await axios({
@@ -69,19 +69,18 @@ async function httpAuthGitHubAuthorization(codeResponse) {
             },
         });
 
-        console.log("GitHub Authorization successful:", response.data);
+        console.log("[GitHub Authorization] Successful:", response.data);
         logCompletion("GitHub Authorization");
         return response.data;
     } catch (error) {
-        console.error("Error during GitHub authorization:", error.message);
+        console.error("[GitHub Authorization] Error:", error.message);
         logCompletion("GitHub Authorization");
         return error;
     }
 }
 
 async function httpGoogleAuth(req, res) {
-    console.log("=== Google Auth ===");
-    console.log("Session User:", req.session.user);
+    console.log("[Google Auth] Session User:", req.session.user);
 
     res.status(200).json({
         message: "Success Google Auth",
@@ -91,8 +90,7 @@ async function httpGoogleAuth(req, res) {
 }
 
 async function httpAuthGitHub(req, res) {
-    console.log("=== GitHub Auth ===");
-    console.log("Session User:", req.session.user);
+    console.log("[GitHub Auth] Session User:", req.session.user);
 
     res.status(200).json({
         message: "Success GitHub Auth",
@@ -102,8 +100,7 @@ async function httpAuthGitHub(req, res) {
 }
 
 async function httpAuthForm(req, res) {
-    console.log("=== Form Auth ===");
-    console.log("Session User:", req.session.user);
+    console.log("[Form Auth] Session User:", req.session.user);
 
     res.status(200).json({
         message: "Success Form Auth",
