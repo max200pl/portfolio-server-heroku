@@ -1,7 +1,9 @@
 const http = require("http");
+const express = require("express");
 const app = require("./app.js");
 const { mongoConnect } = require("./db/mongo");
-const { initializeFirebaseAdmin } = require("./utils/firebaseAdmin"); // Import initialization function
+const { initializeFirebaseAdmin } = require("./utils/firebaseAdmin");
+require("dotenv").config();
 
 const PORT = process.env.SERVER_PORT || 8000;
 const server = http.createServer(app);
