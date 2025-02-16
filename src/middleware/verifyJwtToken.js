@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { logCompletion } = require("../utils/logger");
 require("dotenv").config();
 
 function verifyJwtToken(req, res, next) {
@@ -7,7 +8,7 @@ function verifyJwtToken(req, res, next) {
 
     if (!token) {
         console.info("No JWT token found in session");
-        console.info("=== JWT Token Verification Complete ===");
+        logCompletion("JWT Token Verification");
         return res.status(401).json({ message: "No JWT token found" });
     }
 
@@ -15,11 +16,11 @@ function verifyJwtToken(req, res, next) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
         console.log("JWT Token verified successfully:", decoded);
-        console.info("=== JWT Token Verification Complete ===");
+        logCompletion("JWT Token Verification");
         next();
     } catch (error) {
         console.error("Error verifying JWT token:", error.message);
-        console.info("=== JWT Token Verification Complete ===");
+        logCompletion("JWT Token Verification");
         res.status(401).json({ message: "Invalid JWT token" });
     }
 }

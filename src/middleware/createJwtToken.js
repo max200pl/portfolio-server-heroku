@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { logCompletion } = require("../utils/logger");
 require("dotenv").config();
 
 function createJwtToken(req, res, next) {
@@ -8,7 +9,7 @@ function createJwtToken(req, res, next) {
 
     if (!user) {
         console.info("User not authenticated");
-        console.info("=== JWT Token Creation Complete ===");
+        logCompletion("JWT Token Creation");
         return res.status(401).json({ message: "User not authenticated" });
     }
 
@@ -23,11 +24,11 @@ function createJwtToken(req, res, next) {
         });
         console.log("JWT Token created successfully:", token);
         req.jwtToken = token;
-        console.info("=== JWT Token Creation Complete ===");
+        logCompletion("JWT Token Creation");
         next();
     } catch (error) {
         console.error("Error creating JWT token:", error.message);
-        console.info("=== JWT Token Creation Complete ===");
+        logCompletion("JWT Token Creation");
         res.status(500).json({ message: "Error creating JWT token" });
     }
 }

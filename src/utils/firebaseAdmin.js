@@ -10,26 +10,29 @@ const serviceAccount = {
     client_id: process.env.FIREBASE_CLIENT_ID,
     auth_uri: process.env.FIREBASE_AUTH_URI,
     token_uri: process.env.FIREBASE_TOKEN_URI,
-    auth_provider_x509_cert_url:
-        process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+    auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
     client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
     universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN,
 };
 
 function initializeFirebaseAdmin() {
-    // Check if Firebase app is already initialized
-    try {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            databaseURL: `https://portfolio-react-5b7d3-default-rtdb.firebaseio.com`,
-            storageBucket: "portfolio-react-5b7d3.firebasestorage.app",
-        });
-        console.log("Firebase Admin SDK initialized successfully.");
-    } catch (error) {
-        console.error("Error initializing Firebase Admin SDK:", error);
+    if (!admin.apps.length) {
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                databaseURL: `https://portfolio-react-5b7d3-default-rtdb.firebaseio.com`,
+                storageBucket: "portfolio-react-5b7d3.firebasestorage.app",
+            });
+            console.log("Firebase Admin SDK initialized successfully.");
+        } catch (error) {
+            console.error("Error initializing Firebase Admin SDK:", error.message);
+        }
+    } else {
+        console.log("Firebase Admin SDK already initialized.");
     }
 }
 
 module.exports = {
+    admin,
     initializeFirebaseAdmin,
 };

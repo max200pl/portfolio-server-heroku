@@ -20,7 +20,6 @@ async function httpCreateUser(user) {
     }
 }
 
-
 module.exports = {
     httpCreateUser,
-}
+};
