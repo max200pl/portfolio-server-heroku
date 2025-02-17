@@ -11,47 +11,54 @@ const ProviderSchema = new mongoose.Schema({
     },
 });
 
-const UserSchema = new mongoose.Schema({
-    uid: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    displayName: {
-        type: String,
-    },
-    photoURL: {
-        type: String,
-    },
-    providers: [ProviderSchema],
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
-    roles: {
-        type: [String],
-        default: ["user"],
-    },
-    settings: {
-        theme: {
+const UserSchema = new mongoose.Schema(
+    {
+        uid: {
             type: String,
-            default: "light",
+            required: true,
+            unique: true,
         },
-        language: {
+        email: {
             type: String,
-            default: "en",
+            required: true,
+            unique: true,
+        },
+        firstName: {
+            type: String,
+        },
+        lastName: {
+            type: String,
+        },
+        fullName: {
+            type: String,
+        },
+        displayName: {
+            type: String,
+        },
+        photoURL: {
+            type: String,
+        },
+        providers: [ProviderSchema],
+        authProvider: {
+            type: String,
+        },
+        roles: {
+            type: [String],
+            default: ["user"],
+        },
+        settings: {
+            theme: {
+                type: String,
+                default: "light",
+            },
+            language: {
+                type: String,
+                default: "en",
+            },
         },
     },
-});
+    { timestamps: true }
+);
 
 const User = mongoose.model("Users", UserSchema);
 
