@@ -14,7 +14,13 @@ async function verifyIdToken(req, res, next) {
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         console.log("ID Token verified successfully:", decodedToken);
-        req.user = decodedToken;
+        req.user = {
+            uid: decodedToken.uid,
+            email: decodedToken.email,
+            displayName: decodedToken.name,
+            photoURL: decodedToken.picture,
+            providers: decodedToken.firebase.sign_in_provider,
+        };
         console.info("=== ID Token Verification Complete ===");
         next();
     } catch (error) {
