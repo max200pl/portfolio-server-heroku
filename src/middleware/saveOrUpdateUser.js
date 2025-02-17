@@ -4,6 +4,7 @@ async function saveOrUpdateUser(req, res, next) {
     const user = req.user;
 
     if (!user) {
+        console.error("User data is missing");
         return res.status(400).json({ message: "User data is missing" });
     }
 
@@ -47,6 +48,8 @@ async function saveOrUpdateUser(req, res, next) {
     } catch (error) {
         console.error("Error saving or updating user:", error);
         res.status(500).json({ message: "Internal server error" });
+    } finally {
+        console.info("=== Save or Update User Complete ===");
     }
 }
 

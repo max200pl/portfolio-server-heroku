@@ -3,13 +3,11 @@ const { logCompletion } = require("../utils/logger");
 require("dotenv").config();
 
 function createCookieSession(req, res, next) {
-    const token = req.token;
     console.log("=== Creating Cookie Session ===");
-    console.log("JWT Token:", token);
+    const token = req.token;
 
     if (!token) {
-        console.info("No JWT token provided");
-        logCompletion("Cookie Session Creation");
+        console.error("JWT token is missing");
         return res.status(401).json({ message: "No JWT token provided" });
     }
 
@@ -23,12 +21,13 @@ function createCookieSession(req, res, next) {
             req.session.jwt = token;
             req.session.user = req.user;
             console.log("Session created successfully:", req.session);
-            logCompletion("Cookie Session Creation");
             next();
         } catch (error) {
             console.error("Error creating session:", error.message);
-            logCompletion("Cookie Session Creation");
             res.status(500).json({ message: "Internal server error" });
+        } finally {
+            logCompletion("Cookie Session Creation");
+            console.info("=== Cookie Session Creation Complete ===");
         }
     });
 }
