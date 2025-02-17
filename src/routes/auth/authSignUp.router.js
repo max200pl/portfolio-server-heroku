@@ -1,17 +1,13 @@
 const express = require("express");
 const {
     httpGoogleAuth: httpAuthGoogle,
-    httpGoogleAuthorization,
     httpAuthForm,
-    httpAuthFormAuthorization: httpAuthenticationUser,
-    httpAuthGitHubAuthentication,
-    httpAuthGitHubAuthorization,
     httpAuthGitHub,
-} = require("./auth.controller");
+} = require("./auth.controller"); // Corrected path to auth.controller
 const verifyIdToken = require("../../middleware/verifyIdToken");
 const createJwtToken = require("../../middleware/createJwtToken");
 const createCookieSession = require("../../middleware/createCookieSession");
-const e = require("express");
+const saveOrUpdateUser = require("../../middleware/saveOrUpdateUser");
 
 require("dotenv").config();
 const authSignUp = express.Router();
@@ -19,6 +15,7 @@ const authSignUp = express.Router();
 authSignUp.post(
     "/google",
     verifyIdToken,
+    saveOrUpdateUser,
     createJwtToken,
     createCookieSession,
     httpAuthGoogle
