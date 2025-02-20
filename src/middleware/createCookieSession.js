@@ -1,5 +1,4 @@
 const cookieSession = require("cookie-session");
-const { logCompletion } = require("../utils/logger");
 require("dotenv").config();
 
 function createCookieSession(req, res, next) {
@@ -26,7 +25,6 @@ function createCookieSession(req, res, next) {
             console.error("Error creating session:", error.message);
             res.status(500).json({ message: "Internal server error" });
         } finally {
-            logCompletion("Cookie Session Creation");
             console.info("=== Cookie Session Creation Complete ===");
         }
     });

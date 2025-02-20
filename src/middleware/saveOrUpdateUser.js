@@ -15,9 +15,12 @@ async function saveOrUpdateUser(req, res, next) {
             existingUser.email = user.email;
             existingUser.displayName = user.displayName;
             existingUser.photoURL = user.photoURL;
-            existingUser.providers = user.providers;
+            existingUser.providers = [
+                { providerId: user.providers, providerUid: user.uid },
+            ];
             existingUser.authProvider = user.authProvider;
             await existingUser.save();
+            console.log(`=== User updated in DB: ${existingUser.uid} ===`);
         } else {
             let firstName = user.firstName || "";
             let lastName = user.lastName || "";
@@ -42,6 +45,7 @@ async function saveOrUpdateUser(req, res, next) {
                 authProvider: user.authProvider,
             });
             await newUser.save();
+            console.log(`=== User created in DB: ${newUser.uid} ===`);
         }
 
         next();
