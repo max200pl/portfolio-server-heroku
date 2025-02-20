@@ -20,6 +20,8 @@ async function verifyIdToken(req, res, next) {
             photoURL: decodedToken.picture,
             providers: decodedToken.firebase.sign_in_provider,
         };
+        req.uid = decodedToken.uid;
+        req.email = decodedToken.email;
         next();
     } catch (error) {
         console.error("Error verifying ID token:", error.message);

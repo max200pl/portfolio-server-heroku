@@ -8,6 +8,7 @@ const verifyIdToken = require("../../middleware/verifyIdToken");
 const createJwtToken = require("../../middleware/createJwtToken");
 const createCookieSession = require("../../middleware/createCookieSession");
 const saveOrUpdateUser = require("../../middleware/saveOrUpdateUser");
+const createUserFromForm = require("../../middleware/createUserFromForm");
 
 require("dotenv").config();
 const authSignUp = express.Router();
@@ -21,7 +22,15 @@ authSignUp.post(
     httpAuthGoogle
 );
 
+authSignUp.post(
+    "/form",
+    verifyIdToken,
+    createUserFromForm,
+    createJwtToken,
+    createCookieSession,
+    httpAuthForm
+);
+
 authSignUp.get("/github", httpAuthGitHub);
-authSignUp.post("/form", httpAuthForm);
 
 module.exports = authSignUp;
