@@ -17,12 +17,11 @@ function createCookieSession(req, res, next) {
         secure: process.env.NODE_ENV === "production", // Set secure to true in production
     })(req, res, () => {
         try {
-            req.session.jwt = token;
-            req.session.user = req.user;
-            console.log("Session created successfully:", req.session);
+            res.cookie("jwt", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
+            console.log("Cookie session created successfully");
             next();
         } catch (error) {
-            console.error("Error creating session:", error.message);
+            console.error("Error creating cookie session:", error.message);
             res.status(500).json({ message: "Internal server error" });
         } finally {
             console.info("=== Cookie Session Creation Complete ===");
