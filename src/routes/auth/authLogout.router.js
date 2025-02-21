@@ -1,7 +1,7 @@
 const authLogOut = require("express").Router();
 
 authLogOut.use((req, res, next) => {
-    req.session = null;
+    res.clearCookie("session");
     next();
 });
 
