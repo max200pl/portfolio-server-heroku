@@ -1,5 +1,6 @@
 const axios = require("axios");
 const { logCompletion } = require("../../utils/logger");
+const getUserData = require("../../utils/userData");
 require("dotenv").config();
 
 async function httpGoogleAuthorization(codeResponse) {
@@ -80,31 +81,28 @@ async function httpAuthGitHubAuthorization(codeResponse) {
 }
 
 async function httpGoogleAuth(req, res) {
-    console.log("[Google Auth] Session User:", req.session.user);
-
+    console.log("[Google Auth] User:", req.user);
     res.status(200).json({
         message: "Success Google Auth",
-        user: req.session.user,
+        user: getUserData(req.user),
     });
     logCompletion("Google Auth");
 }
 
 async function httpAuthGitHub(req, res) {
-    console.log("[GitHub Auth] Session User:", req.session.user);
-
+    console.log("[GitHub Auth] User:", req.user);
     res.status(200).json({
         message: "Success GitHub Auth",
-        user: req.session.user,
+        user: getUserData(req.user),
     });
     logCompletion("GitHub Auth");
 }
 
 async function httpAuthForm(req, res) {
-    console.log("[Form Auth] Session User:", req.session.user);
-
+    console.log("[Form Auth] User:", req.user);
     res.status(200).json({
         message: "Success Form Auth",
-        user: req.session.user,
+        user: getUserData(req.user),
     });
     logCompletion("Form Auth");
 }
