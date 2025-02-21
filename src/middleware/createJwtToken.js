@@ -19,7 +19,7 @@ async function createJwtToken(req, res, next) {
 
     try {
         const token = jwt.sign(
-            { uid: user.uid, email: user.email },
+            { sub: user.uid, roles: user.roles },
             secretKey,
             {
                 expiresIn: "1h",
