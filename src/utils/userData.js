@@ -7,6 +7,7 @@ function getUserData(user) {
         displayName,
         roles,
         settings,
+        photoURL,
     } = user;
 
     return {
@@ -17,6 +18,7 @@ function getUserData(user) {
         displayName,
         roles,
         settings,
+        photoURL,
     };
 }
 
