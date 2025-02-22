@@ -1,6 +1,5 @@
 function getUserData(user) {
     const {
-        uid,
         email,
         firstName,
         lastName,
@@ -11,7 +10,6 @@ function getUserData(user) {
     } = user;
 
     return {
-        uid,
         email,
         firstName,
         lastName,

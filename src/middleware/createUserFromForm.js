@@ -33,6 +33,10 @@ async function createUserFromForm(req, res, next) {
         console.log(`=== User created in DB: ${newUser.uid} ===`);
         next();
     } catch (error) {
+        if (error.code === 11000) {
+            console.error("Duplicate key error:", error.message);
+            return res.status(409).json({ message: "Email already exists" });
+        }
         console.error("Error creating user:", error);
         res.status(500).json({ message: "Internal server error" });
     } finally {
