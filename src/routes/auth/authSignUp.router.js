@@ -23,6 +23,15 @@ authSignUp.post(
 );
 
 authSignUp.post(
+    "/github",
+    verifyIdToken,
+    saveOrUpdateUser,
+    createJwtToken,
+    createCookieSession,
+    httpAuthGitHub
+);
+
+authSignUp.post(
     "/form",
     verifyIdToken,
     createUserFromForm,
@@ -30,7 +39,5 @@ authSignUp.post(
     createCookieSession,
     httpAuthForm
 );
-
-authSignUp.get("/github", httpAuthGitHub);
 
 module.exports = authSignUp;
