@@ -1,9 +1,8 @@
-const axios = require("axios");
 const { logCompletion } = require("../../utils/logger");
 const getUserData = require("../../utils/userData");
 require("dotenv").config();
 
-async function googleAuth(req, res) {
+async function httpGoogleAuth(req, res) {
     console.log("[Google Auth] User:", req.user);
     res.status(200).json({
         message: "Success Google Auth",
@@ -31,7 +30,7 @@ async function httpAuthForm(req, res) {
 }
 
 module.exports = {
-    googleAuth,
+    httpGoogleAuth,
     httpAuthGitHub,
     httpAuthForm,
 };
