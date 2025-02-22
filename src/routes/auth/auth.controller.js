@@ -34,7 +34,4 @@ module.exports = {
     httpGoogleAuth,
     httpAuthGitHub,
     httpAuthForm,
-    httpGoogleAuthorization,
-    httpAuthGitHubAuthorization,
-    httpAuthGitHubAuthentication,
 };
