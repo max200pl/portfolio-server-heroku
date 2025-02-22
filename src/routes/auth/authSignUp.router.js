@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-    httpGoogleAuth: httpAuthGoogle,
+    httpGoogleAuth,
     httpAuthForm,
     httpAuthGitHub,
 } = require("./auth.controller"); // Corrected path to auth.controller
@@ -19,7 +19,7 @@ authSignUp.post(
     saveOrUpdateUser,
     createJwtToken,
     createCookieSession,
-    httpAuthGoogle
+    httpGoogleAuth
 );
 
 authSignUp.post(
