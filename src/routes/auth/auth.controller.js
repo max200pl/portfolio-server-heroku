@@ -3,6 +3,7 @@ const getUserData = require("../../utils/userData");
 require("dotenv").config();
 
 async function httpGoogleAuth(req, res) {
+    console.log("=== Google Auth Function ===");
     console.log("[Google Auth] User:", req.user);
     res.status(200).json({
         message: "Success Google Auth",
@@ -12,6 +13,7 @@ async function httpGoogleAuth(req, res) {
 }
 
 async function httpAuthGitHub(req, res) {
+    console.log("=== GitHub Auth Function ===");
     console.log("[GitHub Auth] User:", req.user);
     res.status(200).json({
         message: "Success GitHub Auth",
@@ -21,6 +23,7 @@ async function httpAuthGitHub(req, res) {
 }
 
 async function httpAuthForm(req, res) {
+    console.log("=== Form Auth Function ===");
     console.log("[Form Auth] User:", req.user);
     res.status(200).json({
         message: "Success Form Auth",

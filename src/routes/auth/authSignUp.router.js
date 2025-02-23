@@ -15,6 +15,10 @@ const authSignUp = express.Router();
 
 authSignUp.post(
     "/google",
+    (req, res, next) => {
+        console.log("=== Google Sign-Up Route ===");
+        next();
+    },
     verifyIdToken,
     saveOrUpdateUser,
     createJwtToken,
@@ -24,6 +28,10 @@ authSignUp.post(
 
 authSignUp.post(
     "/github",
+    (req, res, next) => {
+        console.log("=== GitHub Sign-Up Route ===");
+        next();
+    },
     verifyIdToken,
     saveOrUpdateUser,
     createJwtToken,
@@ -33,6 +41,10 @@ authSignUp.post(
 
 authSignUp.post(
     "/form",
+    (req, res, next) => {
+        console.log("=== Form Sign-Up Route ===");
+        next();
+    },
     verifyIdToken,
     createUserFromForm,
     createJwtToken,
