@@ -25,7 +25,7 @@ authLogin.post(
 authLogin.post(
     "/form",
     verifyIdToken,
-    createUserFromForm,
+    saveOrUpdateUser,
     createJwtToken,
     createCookieSession,
     httpAuthForm
