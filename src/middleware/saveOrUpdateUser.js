@@ -1,55 +1,36 @@
-const User = require("../db/users.mongo");
+const {
+    findExistingUser,
+    updateUserFields,
+    createNewUser,
+} = require("../utils/userHelpers");
 
 async function saveOrUpdateUser(req, res, next) {
     const user = req.user;
 
-    if (!user) {
-        console.error("User data is missing");
-        return res.status(400).json({ message: "User data is missing" });
+    if (!user.uid || !user.email) {
+        console.error("Missing user UID or email");
+        return res.status(400).json({ message: "Missing user UID or email" });
     }
 
     try {
-        const existingUser = await User.findOne({ uid: user.uid });
+        let existingUser = await findExistingUser(user.email);
 
         if (existingUser) {
-            existingUser.email = user.email;
-            existingUser.displayName = user.displayName;
-            existingUser.photoURL = user.photoURL;
-            existingUser.providers = [
-                { providerId: user.providers, providerUid: user.uid },
-            ];
-            existingUser.authProvider = user.authProvider;
-            await existingUser.save();
-            console.log(`=== User updated in DB: ${existingUser.uid} ===`);
-        } else {
-            let firstName = user.firstName || "";
-            let lastName = user.lastName || "";
-            let fullName = user.fullName || user.displayName;
-            if (!firstName && !lastName && user.displayName) {
-                const [first, ...lastParts] = user.displayName.split(" ");
-                firstName = first;
-                lastName = lastParts.join(" ");
-            }
-
-            const newUser = new User({
-                uid: user.uid,
-                email: user.email,
-                firstName,
-                lastName,
-                fullName,
-                displayName: user.displayName,
-                photoURL: user.photoURL,
-                providers: [
-                    { providerId: user.providers, providerUid: user.uid },
-                ],
-                authProvider: user.authProvider,
-            });
-            await newUser.save();
-            console.log(`=== User created in DB: ${newUser.uid} ===`);
+            console.log("=== User already exists ===");
+            existingUser = await updateUserFields(existingUser, user);
+            req.user = existingUser;
+            return next();
         }
 
+        const newUser = await createNewUser(user);
+        req.user = newUser;
+        console.log(`=== User created in DB: ${newUser.uid} ===`);
         next();
     } catch (error) {
+        if (error.code === 11000) {
+            console.error("Duplicate key error:", error.message);
+            return res.status(409).json({ message: "Email already exists" });
+        }
         console.error("Error saving or updating user:", error);
         res.status(500).json({ message: "Internal server error" });
     } finally {
