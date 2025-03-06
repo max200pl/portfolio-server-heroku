@@ -31,6 +31,13 @@ authLogin.post(
     httpAuthForm
 );
 
-authLogin.get("/github", httpAuthGitHub);
+authLogin.post(
+    "/github",
+    verifyIdToken,
+    saveOrUpdateUser,
+    createJwtToken,
+    createCookieSession,
+    httpAuthGitHub
+);
 
 module.exports = authLogin;
