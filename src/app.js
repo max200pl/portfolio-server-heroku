@@ -5,6 +5,7 @@ const api = require("./routes/api");
 const app = express();
 
 const allowedOrigins = [
+    "https://portfolio-react-5b7d3.web.app",
     "http://localhost:3000",
     "https://maksym-poskanny-portfolio-react.onrender.com",
 ];
