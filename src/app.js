@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const api = require("./routes/api");
 const app = express();
 
@@ -24,7 +25,7 @@ app.use(
             }
         },
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: "*",
+        allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true,
     })
 );
@@ -33,6 +34,7 @@ app.options("*", cors());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser([process.env.COOKIE_KEY_1, process.env.COOKIE_KEY_2]));
 app.use("/api", api);
 
 app.use((err, req, res, next) => {
