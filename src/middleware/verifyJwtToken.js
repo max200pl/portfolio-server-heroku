@@ -4,17 +4,20 @@ require("dotenv").config();
 
 function verifyJwtToken(req, res, next) {
     console.log("=== Verifying JWT Token ===");
-    const token = req.session.jwt;
+    console.log("Received Session:", req.session);
 
-    if (!token) {
+    if (!req.session || !req.session.jwt) {
         console.info("No JWT token found in session");
         logCompletion("JWT Token Verification");
         return res.status(401).json({ message: "No JWT token found" });
     }
 
+    const token = req.session.jwt;
+
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         console.log("JWT Token verified successfully:", decoded);
+        req.user = decoded;
         logCompletion("JWT Token Verification");
         next();
     } catch (error) {

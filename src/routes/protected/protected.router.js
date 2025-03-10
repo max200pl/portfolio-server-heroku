@@ -4,7 +4,7 @@ const protectedRouter = express.Router();
 
 protectedRouter.use(verifyJwtToken);
 
-protectedRouter.get("/profile", (req, res) => {
+protectedRouter.post("/", (req, res) => {
     res.status(200).json({ message: "Profile data", user: req.user });
 });
 
