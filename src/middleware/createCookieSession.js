@@ -30,14 +30,6 @@ function createCookieSession(req, res, next) {
             // Log the cookies to ensure they are parsed correctly
             console.log("Parsed Cookies:", req.cookies);
 
-            // Check if the cookie was set successfully
-            if (!req.cookies.jwt) {
-                console.error("Failed to set JWT cookie");
-                return res
-                    .status(500)
-                    .json({ message: "Failed to set JWT cookie" });
-            }
-
             next();
         } catch (error) {
             console.error("Error creating cookie session:", error.message);
