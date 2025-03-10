@@ -1,7 +1,12 @@
 const authLogOut = require("express").Router();
 
 authLogOut.use((req, res, next) => {
-    res.clearCookie("session");
+    res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+    });
     next();
 });
 
