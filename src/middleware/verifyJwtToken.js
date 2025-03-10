@@ -1,30 +1,38 @@
 const jwt = require("jsonwebtoken");
-const { logCompletion } = require("../utils/logger");
 require("dotenv").config();
 
 function verifyJwtToken(req, res, next) {
     console.log("=== Verifying JWT Token ===");
-    console.log("Received Session:", req.session);
+    console.log("Received Cookies:", req.cookies);
 
-    if (!req.session || !req.session.jwt) {
-        console.info("No JWT token found in session");
-        logCompletion("JWT Token Verification");
-        return res.status(401).json({ message: "No JWT token found" });
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+        const cookieToken = req.cookies && req.cookies.jwt;
+        if (!cookieToken) {
+            console.error("No access token found in headers or cookies");
+            return res.status(401).json({ message: "No access token found" });
+        }
+        console.log("Using token from cookie");
+        verifyToken(cookieToken, req, res, next);
+    } else {
+        console.log("Using token from authorization header");
+        verifyToken(token, req, res, next);
     }
+}
 
-    const token = req.session.jwt;
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        console.log("JWT Token verified successfully:", decoded);
-        req.user = decoded;
-        logCompletion("JWT Token Verification");
+function verifyToken(token, req, res, next) {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+        if (err) {
+            console.error("Token is invalid or expired:", err.message);
+            return res
+                .status(403)
+                .json({ message: "Token is invalid or expired" });
+        }
+        req.user = decoded; // { userId: ..., roles: ... }
         next();
-    } catch (error) {
-        console.error("Error verifying JWT token:", error.message);
-        logCompletion("JWT Token Verification");
-        res.status(401).json({ message: "Invalid JWT token" });
-    }
+    });
 }
 
 module.exports = verifyJwtToken;
