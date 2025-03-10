@@ -25,6 +25,7 @@ async function httpGetFilteredAndSortedWorks(req, res) {
         console.log(`Returned ${works.length} works`);
         res.status(200).json(works);
     } catch (err) {
+        console.error("Error fetching filtered and sorted works:", err.message);
         res.status(500).json({ message: err.message });
     }
 }
@@ -32,8 +33,10 @@ async function httpGetFilteredAndSortedWorks(req, res) {
 async function httpGetCategoriesWorks(req, res) {
     try {
         const allCategories = await getAllWorkCategories();
+        console.log("Fetched all work categories");
         return res.status(200).json(allCategories);
     } catch (err) {
+        console.error("Error fetching work categories:", err.message);
         return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
@@ -44,13 +47,16 @@ async function httpGetTechnologies(req, res) {
         const technologies = await getTechnologies();
 
         if (!technologies) {
+            console.error("Technologies not found");
             return res.status(500).json({
                 error: `Something went wrong`,
             });
         }
 
+        console.log("Fetched technologies");
         return res.status(200).json(technologies[0]);
     } catch (err) {
+        console.error("Error fetching technologies:", err.message);
         return res.status(500).json({
             error: `Something went wrong: ${err.message}`,
         });
