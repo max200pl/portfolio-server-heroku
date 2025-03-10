@@ -12,7 +12,7 @@ const {
 } = require("../../utils/images");
 const { parseDeep } = require("../../helpers/helpers");
 
-async function httpGetAllCertificates(req, res) {
+async function httpGetCertificates(req, res) {
     const { category } = req.query;
     console.info("=== Fetching Certificates ===");
     console.info("Category filter:", category);
@@ -192,21 +192,23 @@ async function httpUpdateCertificate(req, res) {
 }
 
 async function httpDeleteCertificate(req, res) {
-    const { _id } = req.query;
+    const { certificateId } = req.query;
     console.info("=== Deleting Certificate ===");
-    console.info("Current certificate for delete:", _id);
+    console.info("Current certificate for delete:", certificateId);
 
     try {
-        const certificate = await getCertificateById(_id);
+        const certificate = await getCertificateById(certificateId);
         if (!certificate) {
-            console.info("Certificate not found:", _id);
+            console.info("Certificate not found:", certificateId);
             console.info("=== Certificate Deletion Complete ===");
             return res.status(404).json({ error: "Certificate not found" });
         }
 
         await handleImageDeletion(certificate.cardImage);
-        await deleteCertificate(_id);
-        console.info(`The certificate was successfully deleted: ${_id}`);
+        await deleteCertificate(certificateId);
+        console.info(
+            `The certificate was successfully deleted: ${certificateId}`
+        );
     } catch (err) {
         console.error("Error deleting certificate:", err.message);
         console.info("=== Certificate Deletion Complete ===");
@@ -218,7 +220,7 @@ async function httpDeleteCertificate(req, res) {
     console.info("=== Certificate Deletion Complete ===");
     return res
         .status(200)
-        .json({ message: "Certificate deleted successfully", _id });
+        .json({ message: "Certificate deleted successfully", certificateId });
 }
 
 async function httpGetCertificateById(req, res) {
@@ -246,10 +248,10 @@ async function httpGetCertificateById(req, res) {
 console.info("=== End of Certificate Controller ===");
 
 module.exports = {
-    httpGetAllCertificates,
+    httpGetCertificates,
     httpGetCategoriesCertificates,
     httpCreateCertificate,
     httpUpdateCertificate,
     httpDeleteCertificate,
-    httpGetCertificateById, // Add this line
+    httpGetCertificateById,
 };
