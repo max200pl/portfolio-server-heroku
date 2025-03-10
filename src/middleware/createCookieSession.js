@@ -10,6 +10,7 @@ function createCookieSession(req, res, next) {
         return res.status(401).json({ message: "No JWT token provided" });
     }
 
+    // Initialize cookie session
     cookieSession({
         name: "session",
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
@@ -17,8 +18,26 @@ function createCookieSession(req, res, next) {
         secure: process.env.NODE_ENV === "production", // Set secure to true in production
     })(req, res, () => {
         try {
-            res.cookie("jwt", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
-            console.log("Cookie session created successfully");
+            // Set the JWT cookie here
+            res.cookie("jwt", token, {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/", // Make cookie accessible on all routes
+                secure: process.env.NODE_ENV === "production",
+            });
+            console.log("JWT cookie set successfully");
+
+            // Log the cookies to ensure they are parsed correctly
+            console.log("Parsed Cookies:", req.cookies);
+
+            // Check if the cookie was set successfully
+            if (!req.cookies.jwt) {
+                console.error("Failed to set JWT cookie");
+                return res
+                    .status(500)
+                    .json({ message: "Failed to set JWT cookie" });
+            }
+
             next();
         } catch (error) {
             console.error("Error creating cookie session:", error.message);
