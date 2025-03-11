@@ -38,6 +38,8 @@ app.use(express.json());
 app.use(cookieParser([process.env.COOKIE_KEY_1, process.env.COOKIE_KEY_2]));
 app.use("/api", api);
 
+console.log("Node Environment:", process.env.NODE_ENV);
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send("Что-то сломалось!");

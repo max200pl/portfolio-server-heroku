@@ -1,12 +1,17 @@
 const authLogOut = require("express").Router();
 
 authLogOut.use((req, res, next) => {
+    console.log("=== Logging Out ===");
+    console.log("Node Environment:", process.env.NODE_ENV);
+
     res.clearCookie("jwt", {
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "lax", // Protect against CSRF attacks
+        path: "/", // Make cookie accessible on all routes
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
     });
+
+    console.log("JWT cookie cleared successfully");
     next();
 });
 

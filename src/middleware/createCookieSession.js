@@ -10,6 +10,8 @@ function createCookieSession(req, res, next) {
         return res.status(401).json({ message: "No JWT token provided" });
     }
 
+    console.log("Node Environment:", process.env.NODE_ENV);
+
     // Initialize cookie session
     cookieSession({
         name: "session",
