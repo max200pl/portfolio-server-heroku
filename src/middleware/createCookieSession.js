@@ -21,7 +21,8 @@ function createCookieSession(req, res, next) {
             // Set the JWT cookie here
             res.cookie("jwt", token, {
                 httpOnly: true,
-                sameSite: "lax",
+                sameSite:
+                    process.env.NODE_ENV === "production" ? "None" : "lax", // Protect against CSRF attacks
                 path: "/", // Make cookie accessible on all routes
                 secure: process.env.NODE_ENV === "production",
             });
