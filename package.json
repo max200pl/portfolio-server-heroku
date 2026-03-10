@@ -35,6 +35,9 @@
         "passport-google-oauth20": "^2.0.0",
         "sharp": "^0.32.6"
     },
+    "overrides": {
+        "jwa": "^2.0.0"
+    },
     "devDependencies": {
         "cross-env": "^7.0.3",
         "jest": "^29.7.0",
